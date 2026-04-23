@@ -1,0 +1,217 @@
+@startuml ManiView - Diagramme de Classe
+
+!define MAIN_COLOR #5f93cf
+!define SECONDARY_COLOR #e6effa
+
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor SECONDARY_COLOR
+    BorderColor MAIN_COLOR
+    ArrowColor MAIN_COLOR
+}
+
+class AppConfig <<static>> {
+    +MARKER_PCT: number = 70
+    +START3_PCT: number = 25
+    +SCHED_INTERVAL_MS: number = 25
+    +LOOKAHEAD_SEC: number = 0.15
+    +MIN_SAFETY_SEC: number = 0.01
+    +NOISE_DURATION_SEC: number = 3
+    +BEEP_FREQ_HZ: number = 440
+    +APNEA_MIN_SEC: number = 1
+    +APNEA_MAX_SEC: number = 1800
+    +EXP_MIN_MS: number = 0
+    +EXP_MAX_MS: number = 600000
+    +NUDGE_MIN_MS: number = 125
+    +NUDGE_MAX_MS: number = 500
+    +NUDGE_DEFAULT_MS: number = 250
+    +APNEA_DEFAULT_SEC: number = 30
+    +EXP_DEFAULT_MS: number = 4500
+    +AUDIO_START_OFFSET_SEC: number = 0.02
+}
+
+class Helpers <<static>> {
+    +clampInt(v, min, max): number
+    +formatSec(ms): string
+    +mod(a, n): number
+}
+
+class CycleEngine {
+    -_apneaMs: number
+    -_expMs: number
+    -_activeApnea: number
+    -_activeExp: number
+    -_pendingApnea: number | null
+    -_pendingExp: number | null
+    -_hasPending: boolean
+    -_phaseOffsetMs: number
+    -_cycleIndex: number
+    --
+    +apneaMs: number
+    +expMs: number
+    +activeApneaMs: number
+    +activeExpMs: number
+    +cycleDurationMs: number
+    +phaseOffsetMs: number
+    +cycleIndex: number
+    --
+    +setApnea(ms, isRunning): void
+    +setExp(ms, isRunning): void
+    +computePhaseMs(nowPerf, cycleStartPerf): number
+    +nudge(deltaMs): void
+    +resetPhaseOffset(): void
+    +onCycleRollover(): void
+    +reset(): void
+    +incrementCycleIndex(): void
+    +phaseToPct(phaseMs): number
+}
+
+class AudioService {
+    -_ctx: AudioContext | null
+    -_masterGain: GainNode | null
+    -_noiseBuf: AudioBuffer | null
+    -_startAudioPerf: number
+    -_startAudioTime: number
+    -_schedTimer: number | null
+    -_cycleStartAudioTime: number
+    -_lastPlannedTingleTime: number
+    -_lastPlanned: object
+    --
+    +isRunning: boolean
+    +currentTime: number
+    +cycleStartAudioTime: number
+    --
+    +ensure(): Promise<boolean>
+    +syncOnStart(nowPerf, isResume, pausedPhaseMs): void
+    +advanceCycleStart(cycleDurationMs): void
+    +nudge(deltaMs): void
+    +unmute(): void
+    +mute(): void
+    +startScheduler(engine, isBeepEnabledFn): void
+    +stopScheduler(): void
+    +schedulerTick(engine, isBeepEnabled): void
+    +resetPlanned(): void
+    +recomputePlannedAfterNudge(engine): void
+    +getPhaseMs(engine): number
+    -_getNoiseBuffer(): AudioBuffer
+    -_playSoftBeepAt(t): void
+    -_planTingleAt(t): void
+}
+
+class BarRenderer {
+    -_fill: HTMLElement
+    -_marker3: HTMLElement
+    -_marker30: HTMLElement
+    -_sortieLabel: HTMLElement
+    -_arriveeLabel: HTMLElement
+    -_inspiStartLabel: HTMLElement
+    -_startLabel: HTMLElement
+    --
+    +updateMarkers(engine): void
+    +render(phaseMs, engine): void
+}
+
+class CountdownController {
+    -_countdownEl: HTMLElement
+    -_countNumEl: HTMLElement
+    -_visible: boolean
+    -_lastCount: number
+    --
+    +update(phaseMs, engine): void
+    +hide(): void
+    +show(): void
+}
+
+class UIController {
+    +apneaSecInput: HTMLInputElement
+    +expMsInput: HTMLInputElement
+    +nudgeMsSelect: HTMLSelectElement
+    +startBtn: HTMLButtonElement
+    +stopBtn: HTMLButtonElement
+    +resetBtn: HTMLButtonElement
+    +jumpSortieBtn: HTMLButtonElement
+    +nudgeBackBtn: HTMLButtonElement
+    +nudgeFwdBtn: HTMLButtonElement
+    +uiToggleBtn: HTMLButtonElement
+    +beepEnabled: HTMLInputElement
+    +phaseText: HTMLElement
+    +tText: HTMLElement
+    +cycleText: HTMLElement
+    +nudgeMs: number
+    --
+    +readApneaMs(): number
+    +readExpMs(): number
+    +setRunningState(): void
+    +setStoppedState(): void
+    +setResetState(): void
+    +setJumpSortieState(): void
+    +setPhaseText(phase): void
+    +isBeepEnabled(): boolean
+    +toggleCompactUI(): void
+    +bindEvents(handlers): void
+}
+
+class App {
+    -_engine: CycleEngine
+    -_audio: AudioService
+    -_bar: BarRenderer
+    -_countdown: CountdownController
+    -_ui: UIController
+    -_running: boolean
+    -_rafId: number | null
+    -_cycleStartPerf: number
+    -_isPaused: boolean
+    -_pausedPhaseMs: number
+    --
+    +init(): void
+    -_onApneaChange(): void
+    -_onExpChange(): void
+    -_start(): Promise<void>
+    -_stop(): void
+    -_reset(): void
+    -_jumpToSortie(): void
+    -_nudge(deltaMs): void
+    -_loop(): void
+    -_cancelLoop(): void
+}
+
+' Relations de composition
+App *-- "1" CycleEngine
+App *-- "1" AudioService
+App *-- "1" BarRenderer
+App *-- "1" CountdownController
+App *-- "1" UIController
+
+' Dépendances
+App ..> AppConfig : uses
+App ..> Helpers : uses
+CycleEngine ..> AppConfig : uses
+CycleEngine ..> Helpers : uses
+AudioService ..> AppConfig : uses
+UIController ..> Helpers : uses
+UIController ..> AppConfig : uses
+
+note right of App
+  Point d'entrée principal.
+  Orchestre tous les composants
+  et gère le cycle de vie de
+  l'application (start/stop/reset).
+end note
+
+note right of CycleEngine
+  Gère la logique du cycle d'apnée:
+  - Timing des phases
+  - Rollover de cycle
+  - Nudge temporel
+  - Calcul pourcentage de progression
+end note
+
+note right of AudioService
+  Service audio avec Web Audio API:
+  - Beeps de synchronisation
+  - Sons de tingle (bruit blanc)
+  - Scheduler lookahead
+  - Synchronisation audio/performance
+end note
+
+@enduml
