@@ -1,0 +1,435 @@
+/* ======================================================
+   VARIABLES GLOBALES
+   (couleurs + tailles + espace labels)
+   ====================================================== */
+
+:root{
+  --bg: #ffffff;
+  --text: #0b0f14;
+  --muted: #3b4656;
+
+  --barLight: #e6effa;
+  --barDark:  #5f93cf;
+
+  --labelFont: 44px;
+  --labelGap: 4px;
+
+  --labelAreaH: 190px;
+  --labelImgH: 180px;
+  --labelGapPx: 14px;
+
+  --sortieOffsetX: +40px;
+  --arriveeOffsetX: +40px;
+}
+
+/* ======================================================
+   PARAMÈTRES GÉNÉRAUX
+   ====================================================== */
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+
+html{
+  overflow-y: scroll;
+}
+
+body{
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden; /* était plus bas, même effet */
+}
+
+.mono{
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
+/* ======================================================
+   LAYOUT GLOBAL
+   ====================================================== */
+
+.app{
+  min-height:100%;
+  display:flex;
+  flex-direction:column;
+}
+
+.stage{
+  flex:1;
+  padding: 120px 26px 30px;
+}
+
+/* ======================================================
+   HEADER + CONTROLES
+   ====================================================== */
+
+.top{
+  padding: 22px 26px;
+  max-height: 500px;
+  overflow: hidden;
+  transition: max-height .25s ease, padding .25s ease;
+}
+
+.brand .logo{
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1.05;
+}
+
+.brand .subtitle{
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1.05;
+  margin-top: 2px;
+}
+
+.controls{
+  margin-top: 10px;
+  display:flex;
+  align-items:flex-end;
+  gap: 16px;
+  flex-wrap:wrap;
+}
+
+.field{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.field input{
+  font-size: 26px;
+  padding: 8px 10px;
+  width: 280px;
+}
+
+.field select{
+  font-size: 26px;
+  padding: 8px 10px;
+}
+
+.toggle{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.toggle input{ transform: scale(1.5); }
+
+/* ======================================================
+   BOUTONS (mise en page)
+   ====================================================== */
+
+.buttons{
+  display:flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.controls .buttons{ order: 2; }
+.controls .buttons + .buttons{ order: 1; }
+
+.controls .buttons{ margin-left: 0; }
+
+.controls .buttons:first-of-type{
+  margin-left: 28px;
+}
+
+#resetBtn{
+  margin-left: 18px;
+}
+
+.optionsLine{
+  margin-top: 12px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.fieldCompact select{
+  width: 120px;
+}
+
+/* ======================================================
+   STYLE DES BOUTONS
+   ====================================================== */
+
+button{
+  font-size: 16px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: 1px solid #c9c9c9;
+  background: #f2f2f2;
+  cursor:pointer;
+}
+
+button.primary{
+  background: #eaeaea;
+  border-color: #bdbdbd;
+}
+
+button:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}
+
+/* ======================================================
+   READOUT
+   ====================================================== */
+
+.readout{
+  flex-basis: 100%;
+  white-space: nowrap;
+  margin-top: 12px;
+
+  display:flex;
+  gap: 22px;
+  flex-wrap: nowrap;
+  font-size: 20px;
+  color: var(--muted);
+}
+
+.readoutTop{
+  padding: 0 26px 18px;
+}
+
+/* ======================================================
+   LABELS (images au-dessus de la barre)
+   ====================================================== */
+
+.labels{
+  width: min(1200px, 92vw);
+  margin: 0 auto 30px;
+  position: relative;
+  height: var(--labelAreaH);
+  overflow: visible;
+
+  padding-left: 240px;
+  padding-right: 10px;
+}
+
+.labels .label{
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.labelImg{
+  display: block;
+  height: var(--labelImgH);
+  width: auto;
+  object-fit: contain;
+  user-select: none;
+  pointer-events: none;
+
+  transform: translateY(calc(-1 * var(--labelGapPx)));
+}
+
+#sortieImg{
+  transform: translateY(calc(-1 * var(--labelGapPx))) translateX(var(--sortieOffsetX));
+}
+
+#arriveeImg{
+  transform: translateY(calc(-1 * var(--labelGapPx))) translateX(var(--arriveeOffsetX));
+}
+
+#inspiStartLabel{
+  transform: translateX(-50%) translateX(40px);
+}
+
+#inspiStartLabel .labelImg{
+  transform: translateY(calc(-1 * var(--labelGapPx)));
+}
+
+#startLabel{
+  transform: translateX(-50%) translateX(40px);
+}
+
+/* ======================================================
+   BARRE + REPÈRES
+   ====================================================== */
+
+.barWrap{
+  width: min(1200px, 92vw);
+  margin: 0 auto;
+  position: relative;
+  padding-top: 10px;
+}
+
+.bar{
+  position: relative;
+  height: 110px;
+  border-radius: 55px;
+  background: var(--barLight);
+  overflow: visible;
+}
+
+.fill{
+  position:absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0%;
+  background: var(--barDark);
+  border-radius: 55px;
+  transition: width 0s;
+  z-index: 1;
+}
+
+.marker{
+  position:absolute;
+  top: -28px;
+  bottom: -28px;
+  width: 10px;
+  background: var(--barDark);
+  transform: translateX(-5px);
+  border-radius: 6px;
+  z-index: 2;
+}
+
+#marker0{
+  transform: translateX(0);
+}
+
+.endCap{
+  position: absolute;
+  left: 100%;
+  top: -26px;
+  bottom: -26px;
+  width: 10px;
+  background: var(--barDark);
+  transform: translateX(-5px);
+  border-radius: 6px;
+  z-index: 2;
+}
+
+/* ======================================================
+   FLÈCHE (sous la barre)
+   ====================================================== */
+
+.directionArrow{
+  width: 360px;
+  height: 44px;
+  background: var(--barDark);
+  margin: 70px auto 0;
+
+  clip-path: polygon(
+    0 25%,
+    82% 25%,
+    82% 0,
+    100% 50%,
+    82% 100%,
+    82% 75%,
+    0 75%
+  );
+
+  border-radius: 999px;
+}
+
+/* ======================================================
+   OVERLAY COMPTE À REBOURS
+   ====================================================== */
+
+.countdown{
+  position: fixed;
+  inset: 0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  background: rgba(255,255,255,.72);
+  backdrop-filter: blur(2px);
+  z-index: 999999;
+}
+
+.countdown[hidden]{ display:none; }
+
+.countNum{
+  font-size: 160px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.countLabel{
+  margin-top: 8px;
+  font-size: 34px;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+/* ======================================================
+   MODE COMPACT
+   ====================================================== */
+
+.uiToggle{
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 9999;
+  font-size: 22px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid #c9c9c9;
+  background: #f2f2f2;
+  cursor: pointer;
+}
+
+body.compactUI .top{
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  overflow: hidden;
+}
+
+body.compactUI .stage{
+  padding: 0 26px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  transform: translateY(60px);
+}
+
+body.compactUI .labels,
+body.compactUI .barWrap{
+  width: min(1200px, 92vw);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ======================================================
+   COULEUR START / STOP
+   ====================================================== */
+
+#startBtn{
+  background: #2e7d32;
+  border-color: #2e7d32;
+  color: #ffffff;
+}
+
+#stopBtn{
+  background: #c62828;
+  border-color: #c62828;
+  color: #ffffff;
+}
+
+#startBtn:disabled,
+#stopBtn:disabled{
+  opacity: .5;
+  cursor: not-allowed;
+}

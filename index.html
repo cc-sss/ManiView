@@ -1,0 +1,117 @@
+<!doctype html> 
+
+<html lang="fr"> 
+
+<head> 
+  <meta charset="utf-8" /> 
+  <meta name="viewport" content="width=device-width, initial-scale=1" /> 
+  <title>ManiView</title> 
+  <link rel="stylesheet" href="style.css" /> 
+</head>
+
+<body>
+
+  <button id="uiToggle" class="uiToggle" aria-expanded="true" aria-label="Afficher/masquer les réglages">
+  ≡
+  </button>
+  
+  <div class="app">
+
+    <header class="top"> 
+    
+      <div class="brand">
+        <div class="logo">ManiView</div> 
+      </div>
+      
+      <div class="controls">
+        <label class="field"> 
+          <span>Durée de l'apnée (s)</span>
+          <input id="apneaSec" type="number" min="1" step="1" value="30" />
+        </label>
+        <label class="field"> 
+          <span>Temps d'expiration (ms)</span>
+          <input id="expMs" type="number" min="0" step="1" value="4500" />
+        </label>
+
+        <div class="buttons">
+          <button id="nudgeBack" class="ghost" disabled>- Nudge</button>
+          <button id="nudgeFwd" class="ghost" disabled>+ Nudge</button>
+        </div>
+
+        <div class="buttons">
+          <button id="startBtn" class="primary">Start</button>
+          <button id="stopBtn" class="ghost" disabled>Stop</button>
+          <button id="resetBtn" class="ghost" disabled>Réinitialiser</button>
+          <button id="jumpSortieBtn" class="ghost">Saut → Sortie</button>
+        </div>
+
+        <div class="optionsLine">
+          <label class="toggle">
+            <input id="beepEnabled" type="checkbox" checked />
+            <span>Son activé</span>
+          </label>
+
+          <label class="field fieldCompact">
+            <span>Nudge (ms)</span>
+            <select id="nudgeMs">
+              <option value="125">125</option>
+              <option value="250" selected>250</option>
+              <option value="500">500</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="readout">
+          <span id="phaseText">Stopped</span>
+          <span class="mono" id="tText">t = 0.000 s</span>
+          <span class="mono" id="cycleText">Cycle = 34.500 s</span>
+        </div>
+
+      </div>
+    </header>
+
+    <main class="stage">
+
+      <div class="labels">
+        <div class="label" id="startLabel">
+          <img class="labelImg" src="ImageHold.png" alt="Bloquez" />
+        </div>
+
+        <div class="label" id="sortieLabel">
+          <img id="sortieImg" class="labelImg" src="ImageExpi.png" alt="Expirez" />
+        </div>
+
+        <div class="label" id="arriveeLabel">
+          <img id="arriveeImg" class="labelImg" src="ImageInspi.png" alt="Inspirez" />
+        </div>
+
+        <div class="label" id="inspiStartLabel">
+          <img class="labelImg" src="ImageInspi.png" alt="Inspirez" />
+        </div>
+
+      </div>
+
+      
+      <div class="barWrap">
+        <div class="bar" aria-label="Ventilation cycle"> 
+          <div class="fill" id="fill"></div> 
+          <div class="marker" id="marker0"></div>
+          <div class="marker" id="marker3"></div> 
+          <div class="marker" id="marker30"></div>
+          <div class="endCap" aria-hidden="true"></div> 
+        </div>
+        <div class="directionArrow"></div> 
+      </div>
+
+      <div class="countdown" id="countdown" hidden>
+        <div class="countNum" id="countNum">3</div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+
+</body>
+
+</html>
