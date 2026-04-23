@@ -1,0 +1,208 @@
+@startuml ManiView - Diagramme de Séquence (Démarrage)
+
+!define MAIN_COLOR #5f93cf
+!define SECONDARY_COLOR #e6effa
+
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam maxMessageSize 150
+
+actor Utilisateur
+participant "UIController" as UI
+participant "App" as App
+participant "CycleEngine" as Engine
+participant "AudioService" as Audio
+participant "BarRenderer" as Bar
+participant "CountdownController" as Countdown
+
+== Initialisation ==
+
+Utilisateur -> UI: Clique sur "Start"
+activate UI
+UI -> App: onStart()
+activate App
+
+App -> UI: readApneaMs()
+activate UI
+UI --> App: apneaMs
+deactivate UI
+
+App -> UI: readExpMs()
+activate UI
+UI --> App: expMs
+deactivate UI
+
+App -> Engine: setApnea(apneaMs, false)
+activate Engine
+Engine -> Engine: _apneaMs = apneaMs
+Engine -> Engine: _activeApnea = apneaMs
+deactivate Engine
+
+App -> Engine: setExp(expMs, false)
+activate Engine
+Engine -> Engine: _expMs = expMs
+Engine -> Engine: _activeExp = expMs
+deactivate Engine
+
+App -> Bar: updateMarkers(engine)
+activate Bar
+Bar -> Engine: activeApneaMs
+Engine --> Bar: valeur
+Bar -> Engine: activeExpMs
+Engine --> Bar: valeur
+Bar -> Bar: Positionne les marqueurs\nvisuels sur la barre
+deactivate Bar
+
+App -> App: _running = true
+
+App -> UI: setRunningState()
+activate UI
+UI -> UI: Active bouton Stop\nDésactive bouton Start\nActive boutons Nudge
+deactivate UI
+
+App -> Countdown: hide()
+activate Countdown
+Countdown -> Countdown: Masque le compte à rebours
+deactivate Countdown
+
+== Initialisation Audio ==
+
+App -> Audio: ensure()
+activate Audio
+Audio -> Audio: Crée AudioContext si nécessaire
+Audio -> Audio: Resume le contexte
+Audio -> Audio: Crée MasterGain
+Audio --> App: audioOk = true
+deactivate Audio
+
+App -> Audio: unmute()
+activate Audio
+Audio -> Audio: gain.setValueAtTime(1, currentTime)
+deactivate Audio
+
+App -> Audio: syncOnStart(nowPerf, isPaused, pausedPhaseMs)
+activate Audio
+Audio -> Audio: _startAudioPerf = nowPerf
+Audio -> Audio: _startAudioTime = ctx.currentTime
+Audio -> Audio: _cycleStartAudioTime = currentTime + offset
+deactivate Audio
+
+== Démarrage du Cycle ==
+
+alt Démarrage frais (non en pause)
+    App -> Engine: reset()
+    activate Engine
+    Engine -> Engine: _phaseOffsetMs = 0
+    Engine -> Engine: _cycleIndex = 0
+    Engine -> Engine: _activeApnea = _apneaMs
+    Engine -> Engine: _activeExp = _expMs
+    deactivate Engine
+    
+    App -> App: _cycleStartPerf = performance.now()
+    App -> Audio: resetPlanned()
+    activate Audio
+    Audio -> Audio: Réinitialise les événements\naudio planifiés
+    deactivate Audio
+else Reprise depuis pause
+    App -> App: _cycleStartPerf = now - pausedPhaseMs
+    App -> Audio: Marque les beeps passés\ncomme planifiés
+end
+
+App -> Audio: startScheduler(engine, isBeepEnabledFn)
+activate Audio
+Audio -> Audio: _schedTimer = setInterval(...)
+deactivate Audio
+
+App -> Audio: schedulerTick(engine, isBeepEnabled)
+activate Audio
+Audio -> Engine: activeApneaMs, activeExpMs
+Audio -> Audio: Planifie les beeps\net tingle à venir
+deactivate Audio
+
+App -> App: _loop()
+
+== Boucle d'Animation ==
+
+loop Tant que _running == true
+    App -> App: nowPerf = performance.now()
+    
+    App -> Engine: computePhaseMs(nowPerf, cycleStartPerf)
+    activate Engine
+    Engine -> Engine: phaseMs = (nowPerf - cycleStartPerf)\n+ phaseOffsetMs
+    Engine --> App: phaseMs
+    deactivate Engine
+    
+    App -> Audio: getPhaseMs(engine)
+    activate Audio
+    Audio --> App: phaseCd (phase audio)
+    deactivate Audio
+    
+    App -> Countdown: update(phaseCd, engine)
+    activate Countdown
+    Countdown -> Engine: activeApneaMs
+    Countdown -> Countdown: Calcule compte à rebours
+    alt Si dans les 3 dernières secondes
+        Countdown -> Countdown: Affiche le nombre
+        Countdown -> Utilisateur: Affiche "3", "2", "1"
+    else Sinon
+        Countdown -> Countdown: Masque
+    end
+    deactivate Countdown
+    
+    alt phaseMs >= cycleDurationMs (Rollover)
+        loop Tant que phaseMs >= cycleDurationMs
+            App -> App: phaseMs -= cycleDurationMs
+            App -> App: _cycleStartPerf += cycleDurationMs
+            
+            App -> Audio: advanceCycleStart(cycleDurationMs)
+            activate Audio
+            Audio -> Audio: _cycleStartAudioTime += durée
+            deactivate Audio
+            
+            App -> Engine: onCycleRollover()
+            activate Engine
+            Engine -> Engine: _cycleIndex++
+            alt Paramètres en attente
+                Engine -> Engine: _apneaMs = _pendingApnea
+                Engine -> Engine: _expMs = _pendingExp
+            end
+            Engine -> Engine: _activeApnea = _apneaMs
+            Engine -> Engine: _activeExp = _expMs
+            deactivate Engine
+            
+            App -> Bar: updateMarkers(engine)
+            activate Bar
+            Bar -> Bar: Recalcule positions
+            deactivate Bar
+            
+            App -> Audio: resetPlanned()
+            activate Audio
+            Audio -> Audio: Réinitialise planification
+            deactivate Audio
+        end
+    end
+    
+    App -> Bar: render(phaseMs, engine)
+    activate Bar
+    Bar -> Engine: phaseToPct(phaseMs)
+    activate Engine
+    Engine -> Engine: Convertit phaseMs en pourcentage
+    Engine --> Bar: pct
+    deactivate Engine
+    Bar -> Bar: fill.style.width = pct + "%"
+    Bar -> Utilisateur: Affiche progression visuelle
+    deactivate Bar
+    
+    App -> UI: setPhaseText("Running")
+    activate UI
+    UI -> UI: Met à jour textes de statut
+    UI -> Utilisateur: Affiche "Running"
+    deactivate UI
+    
+    App -> App: requestAnimationFrame(_loop)
+end
+
+deactivate App
+deactivate UI
+
+@enduml
