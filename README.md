@@ -2,7 +2,7 @@
 
 > **Système de guidage visuel et auditif du cycle ventilatoire sous ventilation mécanique assistée non invasive (MANIV) en radiothérapie externe**
 
-Développé dans le cadre d'un Travail de Fin d'Études de Technologue en Imagerie Médicale — Cliniques universitaires Saint-Luc, Bruxelles.
+Développé dans le cadre d'un travail de fin d'études de technologue en imagerie médicale — Cliniques universitaires Saint-Luc, Bruxelles.
 
 <img width="1448" height="677" alt="image" src="https://github.com/user-attachments/assets/53257d00-88bc-4aa0-aa6c-fea84a2a14a9" />
 
