@@ -88,7 +88,7 @@ maniview/
 | Paramètre | Description | Valeur par défaut |
 |---|---|---|
 | **Durée de l'apnée (s)** | Durée de la phase d'apnée en secondes | 30 s |
-| **Temps d'expiration (ms)** | Durée de la phase expiratoire en millisecondes | 4 500 ms |
+| **Temps d'expiration (ms)** | Durée de la phase expiratoire en millisecondes | 4500 ms |
 | **Nudge (ms)** | Incrément de décalage pour la synchronisation | 250 ms |
 | **Son activé** | Active/désactive le guidage sonore | Activé |
 
