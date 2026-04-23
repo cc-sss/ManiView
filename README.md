@@ -55,7 +55,7 @@ Un **guidage sonore** complète l'information visuelle :
 
 ## Démo en ligne
 
-🔗 **[Accéder à ManiView](https://VOTRE-USERNAME.github.io/maniview/)**
+🔗 **[Accéder à ManiView](https://cc-sss.github.io/ManiView/)**
 
 > La démo fonctionne directement dans le navigateur, sans installation. Fonctionne sur tablette et PC.
 
