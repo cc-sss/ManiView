@@ -40,8 +40,8 @@ ManiView affiche en temps réel une **barre de progression** représentant le cy
 
 | Phase | Description |
 |---|---|
-| **Apnée** | Durée configurable (défaut : 30 s). Barre qui progresse de 0% à 70%. Compte à rebours sonore (3-2-1) dans les 3 dernières secondes. |
-| **Expiration/Inspiration** | Durée configurable (défaut : 4 500 ms). Barre qui progresse de 70% à 100% avant de recommencer. |
+| **Haute (apnée)** | Durée configurable (défaut : 30,0 s). Barre qui progresse de 0% à 70%. Compte à rebours sonore (3-2-1) dans les 3 dernières secondes. |
+| **Expiration** | Durée configurable (défaut : 4,5 s). Barre qui progresse de 70% à 100% avant de recommencer. |
 
 Des **images pictographiques** positionnées au-dessus de la barre indiquent au patient l'action attendue à chaque étape clé du cycle :
 
@@ -87,9 +87,9 @@ maniview/
 
 | Paramètre | Description | Valeur par défaut |
 |---|---|---|
-| **Durée de l'apnée (s)** | Durée de la phase d'apnée en secondes | 30 s |
-| **Temps d'expiration (ms)** | Durée de la phase expiratoire en millisecondes | 4500 ms |
-| **Nudge (ms)** | Incrément de décalage pour la synchronisation | 250 ms |
+| **T haut (s)** | Durée de la phase en pression élevée (apnée soutenue) en secondes | 30,0 s |
+| **T bas (s)** | Durée de la phase en pression basse (expiration) en secondes | 4,5 s |
+| **Nudge (s)** | Incrément de décalage pour la post-synchronisation | 0,2 s |
 | **Son activé** | Active/désactive le guidage sonore | Activé |
 
 ### Boutons de contrôle
