@@ -14,13 +14,13 @@ const AppConfig = Object.freeze({
   BEEP_FREQ_HZ:      440,
   APNEA_MIN_SEC:     1,
   APNEA_MAX_SEC:     1800,
-  EXP_MIN_MS:        0,
-  EXP_MAX_MS:        10 * 60_000,
-  NUDGE_MIN_MS:      125,
-  NUDGE_MAX_MS:      500,
-  NUDGE_DEFAULT_MS:  250,
-  APNEA_DEFAULT_SEC: 30,
-  EXP_DEFAULT_MS:    4500,
+  EXP_MIN_SEC:       0,
+  EXP_MAX_SEC:       10 * 60,
+  NUDGE_MIN_SEC:     0.1,
+  NUDGE_MAX_SEC:     0.4,
+  NUDGE_DEFAULT_SEC: 0.2,
+  APNEA_DEFAULT_SEC: 30.0,
+  EXP_DEFAULT_SEC:   4.5,
   AUDIO_START_OFFSET_SEC: 0.02,
 });
 
@@ -30,10 +30,10 @@ const AppConfig = Object.freeze({
 // ======================================================
 
 const Helpers = Object.freeze({
-  clampInt(v, min, max) {
-    const n = Number(v);
+  clampNumber(v, min, max) {
+    const n = Number(String(v).replace(",", "."));
     if (!Number.isFinite(n)) return min;
-    return Math.max(min, Math.min(max, Math.trunc(n)));
+    return Math.max(min, Math.min(max, n));
   },
 
   formatSec(ms) {
@@ -53,7 +53,7 @@ const Helpers = Object.freeze({
 class CycleEngine {
   constructor() {
     this._apneaMs      = AppConfig.APNEA_DEFAULT_SEC * 1000;
-    this._expMs        = AppConfig.EXP_DEFAULT_MS;
+    this._expMs        = AppConfig.EXP_DEFAULT_SEC * 1000;
     this._activeApnea  = this._apneaMs;
     this._activeExp    = this._expMs;
 
@@ -78,7 +78,7 @@ class CycleEngine {
   // --- Setters avec gestion des changements en cours ---
 
   setApnea(ms, isRunning) {
-    const value = Helpers.clampInt(ms, AppConfig.APNEA_MIN_SEC * 1000, AppConfig.APNEA_MAX_SEC * 1000);
+    const value = Helpers.clampNumber(ms, AppConfig.APNEA_MIN_SEC * 1000, AppConfig.APNEA_MAX_SEC * 1000);
     if (isRunning) {
       this._pendingApnea = value;
       this._hasPending   = true;
@@ -89,7 +89,7 @@ class CycleEngine {
   }
 
   setExp(ms, isRunning) {
-    const value = Helpers.clampInt(ms, AppConfig.EXP_MIN_MS, AppConfig.EXP_MAX_MS);
+    const value = Helpers.clampNumber(ms, AppConfig.EXP_MIN_SEC * 1000, AppConfig.EXP_MAX_SEC * 1000);
     if (isRunning) {
       this._pendingExp = value;
       this._hasPending = true;
@@ -538,7 +538,7 @@ class UIController {
     this._phaseTextEl   = document.getElementById("phaseText");
 
     // Valeur nudge
-    this.nudgeMs = AppConfig.NUDGE_DEFAULT_MS;
+    this.nudgeMs = AppConfig.NUDGE_DEFAULT_SEC * 1000;
   }
 
   setPhaseText(text) {
@@ -575,13 +575,14 @@ class UIController {
   }
 
   readApneaMs() {
-    const sec = Helpers.clampInt(this.apneaSecInput.value, AppConfig.APNEA_MIN_SEC, AppConfig.APNEA_MAX_SEC);
-    this.apneaSecInput.value = String(sec);
+    const sec = Helpers.clampNumber(this.apneaSecInput.value, AppConfig.APNEA_MIN_SEC, AppConfig.APNEA_MAX_SEC);
     return sec * 1000;
   }
 
   readExpMs() {
-    return Helpers.clampInt(this.expMsInput.value, AppConfig.EXP_MIN_MS, AppConfig.EXP_MAX_MS);
+    const sec = Helpers.clampNumber(this.expMsInput.value, AppConfig.EXP_MIN_SEC, AppConfig.EXP_MAX_SEC);
+    this.expMsInput.value = sec.toFixed(1);
+    return sec * 1000;
   }
 
   isBeepEnabled() {
@@ -613,17 +614,18 @@ class UIController {
     this.expMsInput.addEventListener("input",    handlers.onExpChange);
 
     if (this.nudgeMsSelect) {
-      this.nudgeMs = Helpers.clampInt(
+      this.nudgeMs = Helpers.clampNumber(
         this.nudgeMsSelect.value,
-        AppConfig.NUDGE_MIN_MS,
-        AppConfig.NUDGE_MAX_MS
-      );
+        AppConfig.NUDGE_MIN_SEC,
+        AppConfig.NUDGE_MAX_SEC
+      ) * 1000;
+
       this.nudgeMsSelect.addEventListener("change", () => {
-        this.nudgeMs = Helpers.clampInt(
+        this.nudgeMs = Helpers.clampNumber(
           this.nudgeMsSelect.value,
-          AppConfig.NUDGE_MIN_MS,
-          AppConfig.NUDGE_MAX_MS
-        );
+          AppConfig.NUDGE_MIN_SEC,
+          AppConfig.NUDGE_MAX_SEC
+        ) * 1000;
       });
     }
   }
@@ -752,7 +754,7 @@ class App {
     if (!this._running) return;
 
     const nowP = performance.now();
-    this._pausedPhaseMs = Helpers.clampInt(
+    this._pausedPhaseMs = Helpers.clampNumber(
       this._engine.computePhaseMs(nowP, this._cycleStartPerf),
       0,
       this._engine.cycleDurationMs
