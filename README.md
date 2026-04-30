@@ -4,7 +4,7 @@
 
 Développé dans le cadre d'un travail de fin d'études de **technologue en imagerie médicale** — Cliniques universitaires Saint-Luc, Bruxelles.
 
-<img width="1448" height="677" alt="image" src="https://github.com/user-attachments/assets/53257d00-88bc-4aa0-aa6c-fea84a2a14a9" />
+<img width="1447" height="753" alt="image" src="https://github.com/user-attachments/assets/c345d9e9-8485-4f9e-82f4-d9e963e01d3e" />
 
 ---
 
