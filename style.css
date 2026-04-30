@@ -151,6 +151,8 @@ body{
   display: flex;
   align-items: center;
   gap: 24px;
+
+  flex-basis: 100%; 
 }
 
 .fieldCompact select{
