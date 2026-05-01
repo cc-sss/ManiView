@@ -8,15 +8,6 @@ Développé dans le cadre d'un travail de fin d'études de **bachelor en imageri
 
 ---
 
-## Auteur
-
-**Auteur** : Cristina Suriano 3BIM  
-**Institution** : Haute École Léonard de Vinci, Place de l'Alma 3, 1200, Belgique  
-**Site clinique** : Cliniques universitaires Saint-Luc, Avenue Hippocrate 10, 1200, Belgique  
-**Année académique** : 2025–2026  
-
----
-
 ## Table des matières
 
 - [Contexte clinique](#contexte-clinique)
@@ -175,6 +166,15 @@ Représente les scénarios principaux : Stop, Reset, Saut → Sortie, Nudge, et 
 → [`uml/sequence_diagram_operations.puml`](./uml/sequence_diagram_operations.puml)
 
 > Pour visualiser les fichiers `.puml`, vous pouvez utiliser [PlantUML Online](https://www.plantuml.com/plantuml/uml/) ou l'extension [PlantUML pour VS Code](https://marketplace.visualstudio.com/items?itemName=jebbs.plantuml).
+
+---
+
+## Auteur
+
+**Auteur** : Cristina Suriano 3BIM  
+**Institution** : Haute École Léonard de Vinci, Place de l'Alma 3, 1200, Belgique  
+**Site clinique** : Cliniques universitaires Saint-Luc, Avenue Hippocrate 10, 1200, Belgique  
+**Année académique** : 2025–2026  
 
 ---
 
