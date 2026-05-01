@@ -50,7 +50,7 @@ Des **images pictographiques** positionnées au-dessus de la barre indiquent au 
 - **Expiration** — à la fin de l'apnée
 
 Un **guidage sonore** complète l'information visuelle :
-- Son de type "tingle" (bruit blanc filtré) au démarrage de chaque cycle
+- Son de type "tingle"(bruit blanc filtré) au démarrage de chaque cycle
 - Bips progressifs (3–2–1) dans les 3 dernières secondes d'apnée
 
 ---
