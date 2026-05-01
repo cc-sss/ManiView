@@ -2,9 +2,18 @@
 
 > **Système de guidage visuel et auditif du cycle ventilatoire sous ventilation mécanique assistée non invasive (MANIV) en radiothérapie externe**
 
-Développé dans le cadre d'un travail de fin d'études de **technologue en imagerie médicale** — Cliniques universitaires Saint-Luc, Bruxelles.
+Développé dans le cadre d'un travail de fin d'études de **bachelor en imagerie médicale**.
 
 <img width="1447" height="753" alt="image" src="https://github.com/user-attachments/assets/c345d9e9-8485-4f9e-82f4-d9e963e01d3e" />
+
+---
+
+## Auteur
+
+**Auteur** : Cristina Suriano 3BIM  
+**Institution** : Haute École Léonard de Vinci, Place de l'Alma 3, 1200, Belgique  
+**Site clinique** : Cliniques universitaires Saint-Luc, Avenue Hippocrate 10, 1200, Belgique  
+**Année académique** : 2025–2026  
 
 ---
 
@@ -166,15 +175,6 @@ Représente les scénarios principaux : Stop, Reset, Saut → Sortie, Nudge, et 
 → [`uml/sequence_diagram_operations.puml`](./uml/sequence_diagram_operations.puml)
 
 > Pour visualiser les fichiers `.puml`, vous pouvez utiliser [PlantUML Online](https://www.plantuml.com/plantuml/uml/) ou l'extension [PlantUML pour VS Code](https://marketplace.visualstudio.com/items?itemName=jebbs.plantuml).
-
----
-
-## Auteur
-
-**Auteur** : Cristina Suriano 3BIM  
-**Institution** : Haute École Léonard de Vinci, Place de l'Alma 3, 1200, Belgique  
-**Site clinique** : Cliniques universitaires Saint-Luc, Avenue Hippocrate 10, 1200, Belgique  
-**Année académique** : 2025–2026  
 
 ---
 
