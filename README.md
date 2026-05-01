@@ -172,8 +172,8 @@ Représente les scénarios principaux : Stop, Reset, Saut → Sortie, Nudge, et 
 ## Auteur
 
 **Auteur** : Cristina Suriano 3BIM
-**Institution** : Haute École Léoanard de Vinci  
-**Site clinique** : Cliniques universitaires Saint-Luc, Bruxelles  
+**Institution** : Haute École Léoanard de Vinci, Place de l'Alma 3, 1200, Belgique
+**Site clinique** : Cliniques universitaires Saint-Luc, Avenue Hippocrate 10, 1200, Belgique
 **Année académique** : 2025–2026
 
 ---
