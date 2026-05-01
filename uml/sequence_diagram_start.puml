@@ -27,7 +27,7 @@ activate UI
 UI --> App: apneaMs
 deactivate UI
 
-App -> UI: readExpMs()
+App -> UI: readExpSecAsMs()
 activate UI
 UI --> App: expMs
 deactivate UI

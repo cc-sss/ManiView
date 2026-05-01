@@ -20,18 +20,17 @@ class AppConfig <<static>> {
     +BEEP_FREQ_HZ: number = 440
     +APNEA_MIN_SEC: number = 1
     +APNEA_MAX_SEC: number = 1800
-    +EXP_MIN_MS: number = 0
-    +EXP_MAX_MS: number = 600000
-    +NUDGE_MIN_MS: number = 125
-    +NUDGE_MAX_MS: number = 500
-    +NUDGE_DEFAULT_MS: number = 250
-    +APNEA_DEFAULT_SEC: number = 30
-    +EXP_DEFAULT_MS: number = 4500
+    +EXP_MIN_SEC: number = 0
+    +EXP_MAX_SEC: number = 600
+    +NUDGE_MIN_SEC: number = 0.1
+    +NUDGE_MAX_SEC: number = 0.4
+    +NUDGE_DEFAULT_SEC: number = 0.2
+    +EXP_DEFAULT_SEC: number = 4.5
     +AUDIO_START_OFFSET_SEC: number = 0.02
 }
 
 class Helpers <<static>> {
-    +clampInt(v, min, max): number
+    +clampNumber(v, min, max): number
     +formatSec(ms): string
     +mod(a, n): number
 }
@@ -124,8 +123,8 @@ class CountdownController {
 
 class UIController {
     +apneaSecInput: HTMLInputElement
-    +expMsInput: HTMLInputElement
-    +nudgeMsSelect: HTMLSelectElement
+    +expSecInput: HTMLInputElement
+    +nudgeSecSelect: HTMLSelectElement
     +startBtn: HTMLButtonElement
     +stopBtn: HTMLButtonElement
     +resetBtn: HTMLButtonElement
@@ -140,7 +139,7 @@ class UIController {
     +nudgeMs: number
     --
     +readApneaMs(): number
-    +readExpMs(): number
+    +readExpSecAsMs(): number
     +setRunningState(): void
     +setStoppedState(): void
     +setResetState(): void

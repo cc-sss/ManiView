@@ -521,9 +521,9 @@ class UIController {
   constructor() {
     // Inputs
     this.apneaSecInput  = document.getElementById("apneaSec");
-    this.expMsInput     = document.getElementById("expMs");
+    this.expSecInput = document.getElementById("expSec");
     this.beepEnabled    = document.getElementById("beepEnabled");
-    this.nudgeMsSelect  = document.getElementById("nudgeMs");
+    this.nudgeSecSelect = document.getElementById("nudgeSec");
 
     // Boutons
     this.startBtn       = document.getElementById("startBtn");
@@ -576,12 +576,13 @@ class UIController {
 
   readApneaMs() {
     const sec = Helpers.clampNumber(this.apneaSecInput.value, AppConfig.APNEA_MIN_SEC, AppConfig.APNEA_MAX_SEC);
+    this.apneaSecInput.value = sec.toFixed(1);
     return sec * 1000;
   }
 
-  readExpMs() {
-    const sec = Helpers.clampNumber(this.expMsInput.value, AppConfig.EXP_MIN_SEC, AppConfig.EXP_MAX_SEC);
-    this.expMsInput.value = sec.toFixed(1);
+  readExpSecAsMs() {
+    const sec = Helpers.clampNumber(this.expSecInput.value, AppConfig.EXP_MIN_SEC, AppConfig.EXP_MAX_SEC);
+    this.expSecInput.value = sec.toFixed(1);
     return sec * 1000;
   }
 
@@ -611,18 +612,18 @@ class UIController {
     this.uiToggleBtn.addEventListener("click",   handlers.onUIToggle);
 
     this.apneaSecInput.addEventListener("input", handlers.onApneaChange);
-    this.expMsInput.addEventListener("input",    handlers.onExpChange);
+    this.expSecInput.addEventListener("input",    handlers.onExpChange);
 
-    if (this.nudgeMsSelect) {
+    if (this.nudgeSecSelect) {
       this.nudgeMs = Helpers.clampNumber(
-        this.nudgeMsSelect.value,
+        this.nudgeSecSelect.value,
         AppConfig.NUDGE_MIN_SEC,
         AppConfig.NUDGE_MAX_SEC
       ) * 1000;
 
-      this.nudgeMsSelect.addEventListener("change", () => {
+      this.nudgeSecSelect.addEventListener("change", () => {
         this.nudgeMs = Helpers.clampNumber(
-          this.nudgeMsSelect.value,
+          this.nudgeSecSelect.value,
           AppConfig.NUDGE_MIN_SEC,
           AppConfig.NUDGE_MAX_SEC
         ) * 1000;
@@ -692,7 +693,7 @@ class App {
   }
 
   _onExpChange() {
-    const ms = this._ui.readExpMs();
+    const ms = this._ui.readExpSecAsMs();
     this._engine.setExp(ms, this._running);
     if (!this._running) {
       this._bar.updateMarkers(this._engine);
@@ -706,7 +707,7 @@ class App {
   async _start() {
     // Lecture des paramètres courants
     this._engine.setApnea(this._ui.readApneaMs(), false);
-    this._engine.setExp(this._ui.readExpMs(), false);
+    this._engine.setExp(this._ui.readExpSecAsMs(), false);
     this._bar.updateMarkers(this._engine);
 
     this._running = true;

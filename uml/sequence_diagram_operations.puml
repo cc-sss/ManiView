@@ -29,7 +29,7 @@ activate Engine
 Engine --> App: phaseMs
 deactivate Engine
 
-App -> App: _pausedPhaseMs = clamp(phaseMs)
+App -> App: _pausedPhaseMs = clampNumber(phaseMs)
 App -> App: _isPaused = true
 App -> App: _running = false
 
@@ -171,7 +171,7 @@ deactivate UI
 
 Utilisateur -> UI: Clique sur "+ Nudge" ou "- Nudge"
 activate UI
-UI -> App: onNudgeFwd(nudgeMs) ou onNudgeBack(-nudgeMs)
+UI -> App: onNudgeFwd(nudgeStepMs) ou onNudgeBack(-nudgeStepMs)
 activate App
 
 App -> Engine: nudge(deltaMs)
