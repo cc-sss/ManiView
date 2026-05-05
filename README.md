@@ -40,17 +40,17 @@ ManiView affiche en temps réel une **barre de progression** représentant le cy
 
 | Phase | Description |
 |---|---|
-| **Haute (apnée)** | Durée configurable (défaut : 30,0 s). Barre qui progresse de 0% à 70%. Compte à rebours sonore (3-2-1) dans les 3 dernières secondes. |
+| **Haute (apnée soutenue)** | Durée configurable (défaut : 30,0 s). Barre qui progresse de 0% à 70%. |
 | **Basse (expiration)** | Durée configurable (défaut : 4,5 s). Barre qui progresse de 70% à 100% avant de recommencer. |
 
-Des **images pictographiques** positionnées au-dessus de la barre indiquent au patient l'action attendue à chaque étape clé du cycle :
+Des **images pictographiques** positionnées au-dessus de la barre indiquent au patient ce qui va se passer à chaque étape clé du cycle ventilatoire :
 
-- **Inspiration** — en début de cycle
-- **Blocage** — pendant l'apnée
-- **Expiration** — à la fin de l'apnée
+- En début de cycle - **la pression des voies aériennes augmente** --> le patient sens l'air arriver et remplir ses poumons
+- Pendant l'apnée - **la pression des voies aériennes cesse d'augmenter** --> le patient reste immobile 
+- À la fin de l'apnée - **la pression des voies aériennes rediminue** — le patient peut expirer l'air
 
 Un **guidage sonore** complète l'information visuelle :
-- Son de type "tingle" (bruit blanc filtré) au démarrage de chaque cycle
+- Son de type "tingle" (bruit blanc filtré) dans les 3 secondes qui suivent le démarrage de chaque cycle
 - Bips progressifs (3–2–1) dans les 3 dernières secondes d'apnée
 
 ---
@@ -59,7 +59,7 @@ Un **guidage sonore** complète l'information visuelle :
 
 🔗 **[Accéder à ManiView](https://cc-sss.github.io/ManiView/)**
 
-> La démo fonctionne directement dans le navigateur, sans installation. Fonctionne sur tablette et PC.
+> La démo fonctionne directement dans le navigateur, sans installation. Fonctionne sur tablette PC, tablette et smartphone.
 
 ---
 
@@ -96,12 +96,12 @@ maniview/
 
 | Bouton | Action |
 |---|---|
-| **Start** | Lance le cycle ventilatoire avec un démarrage frais |
+| **Start** | Lance le cycle ventilatoire à la position actuelle |
 | **Stop** | Met en pause à la position actuelle |
 | **Réinitialiser** | Remet la barre à zéro |
 | **Saut → Sortie** | Positionne directement à la phase d'expiration (70%) |
-| **- Nudge / + Nudge** | Décale la synchronisation sans redémarrer le cycle |
-| **≡** (coin supérieur droit) | Masque/affiche les contrôles (mode patient compact) |
+| **- Nudge / + Nudge** | Léger décalage temporel du remplissage de la barre de progression  |
+| **≡** (coin supérieur droit) | Masque/affiche les contrôles |
 
 ### Lancement local
 
