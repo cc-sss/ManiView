@@ -41,7 +41,7 @@ ManiView affiche en temps réel une **barre de progression** représentant le cy
 | Phase | Description |
 |---|---|
 | **Haute (apnée)** | Durée configurable (défaut : 30,0 s). Barre qui progresse de 0% à 70%. Compte à rebours sonore (3-2-1) dans les 3 dernières secondes. |
-| **Expiration** | Durée configurable (défaut : 4,5 s). Barre qui progresse de 70% à 100% avant de recommencer. |
+| **Basse (expiration)** | Durée configurable (défaut : 4,5 s). Barre qui progresse de 70% à 100% avant de recommencer. |
 
 Des **images pictographiques** positionnées au-dessus de la barre indiquent au patient l'action attendue à chaque étape clé du cycle :
 
