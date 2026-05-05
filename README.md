@@ -43,7 +43,7 @@ ManiView affiche en temps réel une **barre de progression** représentant le cy
 | **Haute (apnée soutenue)** | Durée configurable (défaut : 30,0 s). Barre qui progresse de 0% à 70%. |
 | **Basse (expiration)** | Durée configurable (défaut : 4,5 s). Barre qui progresse de 70% à 100% avant de recommencer. |
 
-Des **images pictographiques** positionnées au-dessus de la barre indiquent au patient ce qui va se passer à chaque étape clé du cycle ventilatoire :
+Des **pictogrammes** positionnées au-dessus de la barre indiquent au patient ce qui va se passer à chaque étape clé du cycle ventilatoire :
 
 - En début de cycle - **la pression des voies aériennes augmente** --> le patient sens l'air arriver et remplir ses poumons
 - Pendant l'apnée - **la pression des voies aériennes cesse d'augmenter** --> le patient reste immobile 
@@ -52,6 +52,8 @@ Des **images pictographiques** positionnées au-dessus de la barre indiquent au 
 Un **guidage sonore** complète l'information visuelle :
 - Son de type "tingle" (bruit blanc filtré) dans les 3 secondes qui suivent le démarrage de chaque cycle
 - Bips progressifs (3–2–1) dans les 3 dernières secondes d'apnée
+
+ManiView fonctionne sur le principe d’une synchronisation manuelle avec le cycle ventilatoire du patient. Les manipulateurs démarrent l’application au moment estimé du début de l’insufflation d’air par le ventilateur. Si un léger décalage initial est observé, celui-ci peut être corrigé grâce aux fonctions de post-synchronisation intégrées à l’application.
 
 ---
 
