@@ -47,7 +47,7 @@ Des **images pictographiques** positionnées au-dessus de la barre indiquent au 
 
 - En début de cycle - **la pression des voies aériennes augmente** --> le patient sens l'air arriver et remplir ses poumons
 - Pendant l'apnée - **la pression des voies aériennes cesse d'augmenter** --> le patient reste immobile 
-- À la fin de l'apnée - **la pression des voies aériennes rediminue** — le patient peut expirer l'air
+- À la fin de l'apnée - **la pression des voies aériennes rediminue** —-> le patient peut expirer l'air
 
 Un **guidage sonore** complète l'information visuelle :
 - Son de type "tingle" (bruit blanc filtré) dans les 3 secondes qui suivent le démarrage de chaque cycle
