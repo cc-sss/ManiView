@@ -17,8 +17,8 @@ Développé dans le cadre d'un travail de fin d'études de **bachelor en imageri
 - [Utilisation](#utilisation)
 - [Architecture technique](#architecture-technique)
 - [Diagrammes UML](#diagrammes-uml)
-- [Auteur](#auteur)
 - [Statut du projet et conditions d'utilisation](#statut-du-projet-et-conditions-dutilisation)
+- [Auteur](#auteur)
 
 ---
 
