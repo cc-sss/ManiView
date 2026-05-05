@@ -23,7 +23,7 @@ Développé dans le cadre d'un travail de fin d'études de **bachelor en imageri
 
 ## Contexte clinique
 
-En radiothérapie externe, la gestion du mouvement respiratoire est un enjeu majeur pour la précision des traitements des tumeurs mobiles. La technique de ventilation mécanique assistée non invasive **(MANIV)**, développée aux Cliniques universitaires Saint-Luc, permet d'obtenir des apnées de 20–30 secondes avec une excellente reproductibilité des mouvements thoraco-abdominaux.
+En radiothérapie externe, la gestion du mouvement respiratoire est un enjeu majeur pour la précision des traitements des tumeurs mobiles. La technique de ventilation mécanique assistée non invasive **(MANIV)**, développée aux Cliniques universitaires Saint-Luc, permet, à travers une ventilation non invasive du patient, d'obtenir des apnées de 20–30 secondes avec une excellente reproductibilité des mouvements thoraco-abdominaux.
 
 Cependant, des patients traités sous MANIV rapportaient :
 - Des difficultés à appréhender la **durée des apnées**
