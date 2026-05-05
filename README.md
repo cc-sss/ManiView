@@ -18,6 +18,7 @@ Développé dans le cadre d'un travail de fin d'études de **bachelor en imageri
 - [Architecture technique](#architecture-technique)
 - [Diagrammes UML](#diagrammes-uml)
 - [Auteur](#auteur)
+- [Statut du projet et conditions d'utilisation](#statut-du-projet-et-conditions-dutilisation)
 
 ---
 
@@ -168,6 +169,16 @@ Représente les scénarios principaux : Stop, Reset, Saut → Sortie, Nudge, et 
 → [`uml/sequence_diagram_operations.puml`](./uml/sequence_diagram_operations.puml)
 
 > Pour visualiser les fichiers `.puml`, vous pouvez utiliser [PlantUML Online](https://www.plantuml.com/plantuml/uml/) ou l'extension [PlantUML pour VS Code](https://marketplace.visualstudio.com/items?itemName=jebbs.plantuml).
+
+---
+
+## Statut du projet et conditions d'utilisation
+
+Ce dépôt est mis à disposition à des fins de consultation académique et de documentation du travail de fin d'études.
+
+ManiView est un prototype développé dans un contexte de recherche et de formation en imagerie médicale/radiothérapie. Il ne constitue pas un dispositif médical certifié et n'a pas été validé pour une utilisation clinique de routine.
+
+Aucune licence open source n'est attribuée à ce dépôt à ce stade. Par conséquent, aucune autorisation n'est accordée pour réutiliser, modifier, redistribuer, déployer ou intégrer ce logiciel sans accord écrit préalable de l'autrice.
 
 ---
 
