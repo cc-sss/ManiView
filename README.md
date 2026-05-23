@@ -46,9 +46,9 @@ ManiView affiche en temps réel une **barre de progression** représentant le cy
 
 Des **pictogrammes** positionnés au-dessus de la barre indiquent au patient ce qui va se passer à chaque étape clé du cycle ventilatoire :
 
-- En début de cycle - **la pression des voies aériennes augmente** --> le patient sent l'air arriver et remplir ses poumons
-- Pendant l'apnée - **la pression des voies aériennes cesse d'augmenter** --> le patient reste immobile 
-- À la fin de l'apnée - **la pression des voies aériennes rediminue** —-> le patient peut expirer l'air
+- En début de cycle - **la pression des voies aériennes augmente** → le patient sent l'air arriver et remplir ses poumons
+- Pendant l'apnée - **la pression des voies aériennes cesse d'augmenter** → le patient reste immobile 
+- À la fin de l'apnée - **la pression des voies aériennes rediminue** → le patient peut expirer l'air
 
 Un **guidage sonore** complète l'information visuelle :
 - Son de type "tingle" (bruit blanc filtré) dans les 3 secondes qui suivent le démarrage de chaque cycle
@@ -62,7 +62,7 @@ ManiView fonctionne sur le principe d’une synchronisation manuelle avec le cyc
 
 🔗 **[Accéder à ManiView](https://cc-sss.github.io/ManiView/)**
 
-> La démo fonctionne directement dans le navigateur, sans installation. Fonctionne sur tablette PC, tablette et smartphone.
+> La démo fonctionne directement dans le navigateur, sans installation. Fonctionne sur PC, tablette et smartphone.
 
 ---
 
