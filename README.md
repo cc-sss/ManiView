@@ -46,7 +46,7 @@ ManiView affiche en temps réel une **barre de progression** représentant le cy
 
 Des **pictogrammes** positionnés au-dessus de la barre indiquent au patient ce qui va se passer à chaque étape clé du cycle ventilatoire :
 
-- En début de cycle - **la pression des voies aériennes augmente** --> le patient sens l'air arriver et remplir ses poumons
+- En début de cycle - **la pression des voies aériennes augmente** --> le patient sent l'air arriver et remplir ses poumons
 - Pendant l'apnée - **la pression des voies aériennes cesse d'augmenter** --> le patient reste immobile 
 - À la fin de l'apnée - **la pression des voies aériennes rediminue** —-> le patient peut expirer l'air
 
