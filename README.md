@@ -44,7 +44,7 @@ ManiView affiche en temps réel une **barre de progression** représentant le cy
 | **Haute (apnée soutenue)** | Durée configurable (défaut : 30,0 s). Barre qui progresse de 0% à 70%. |
 | **Basse (expiration)** | Durée configurable (défaut : 4,5 s). Barre qui progresse de 70% à 100% avant de recommencer. |
 
-Des **pictogrammes** positionnées au-dessus de la barre indiquent au patient ce qui va se passer à chaque étape clé du cycle ventilatoire :
+Des **pictogrammes** positionnés au-dessus de la barre indiquent au patient ce qui va se passer à chaque étape clé du cycle ventilatoire :
 
 - En début de cycle - **la pression des voies aériennes augmente** --> le patient sens l'air arriver et remplir ses poumons
 - Pendant l'apnée - **la pression des voies aériennes cesse d'augmenter** --> le patient reste immobile 
