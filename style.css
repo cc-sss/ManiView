@@ -1,6 +1,20 @@
 /* ======================================================
    VARIABLES GLOBALES
-   (couleurs + tailles + espace labels)
+   PARAMÈTRES GÉNÉRAUX DE L'APPLICATION
+   AFFICHAGE DE L'ENTÊTE (classe .app)
+   AFFICHAGE DES BOUTONS (B)
+   - Mise en page
+   - Style
+   AFFICHAGE DES INFORMATIONS SUR L'ÉTAT DU SYSTÈME (subclasse .readout)
+   PICTOGRAMMES (subclasse .labels)
+   BARRE + REPÈRES + FLÈCHE SOUS LA BARRE (classe .barWrap)
+   OVERLAY COMPTE À REBOURS
+   MODE COMPACT
+   ====================================================== */
+
+
+/* ======================================================
+   VARIABLES GLOBALES
    ====================================================== */
 
 :root{
@@ -23,7 +37,7 @@
 }
 
 /* ======================================================
-   PARAMÈTRES GÉNÉRAUX
+   PARAMÈTRES GÉNÉRAUX DE L'APPLICATION
    ====================================================== */
 
 *{ box-sizing:border-box; }
@@ -38,17 +52,8 @@ body{
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   background: var(--bg);
   color: var(--text);
-  overflow-x: hidden; /* était plus bas, même effet */
+  overflow-x: hidden; 
 }
-
-.mono{
-  font-variant-numeric: tabular-nums;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-}
-
-/* ======================================================
-   LAYOUT GLOBAL
-   ====================================================== */
 
 .app{
   min-height:100%;
@@ -62,7 +67,7 @@ body{
 }
 
 /* ======================================================
-   HEADER + CONTROLES
+   AFFICHAGE DE L'ENTÊTE (classe .app)
    ====================================================== */
 
 .top{
@@ -123,7 +128,11 @@ body{
 .toggle input{ transform: scale(1.5); }
 
 /* ======================================================
-   BOUTONS (mise en page)
+   BOUTONS (B) (subclasse .buttons)
+   ====================================================== */
+
+/* ======================================================
+   B - Mise en page
    ====================================================== */
 
 .buttons{
@@ -160,7 +169,7 @@ body{
 }
 
 /* ======================================================
-   STYLE DES BOUTONS
+   B - Style
    ====================================================== */
 
 button{
@@ -182,9 +191,32 @@ button:disabled{
   cursor:not-allowed;
 }
 
+#startBtn{
+  background: #2e7d32;
+  border-color: #2e7d32;
+  color: #ffffff;
+}
+
+#stopBtn{
+  background: #c62828;
+  border-color: #c62828;
+  color: #ffffff;
+}
+
+#startBtn:disabled,
+#stopBtn:disabled{
+  opacity: .5;
+  cursor: not-allowed;
+}
+
 /* ======================================================
-   READOUT
+   MISE EN PAGE DES INFORMATIONS SUR L'ÉTAT DU SYSTÈME (subclasse .readout)
    ====================================================== */
+
+.mono{
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
 
 .readout{
   flex-basis: 100%;
@@ -203,7 +235,7 @@ button:disabled{
 }
 
 /* ======================================================
-   LABELS (images au-dessus de la barre)
+   PICTOGRAMMES (subclasse .labels)
    ====================================================== */
 
 .labels{
@@ -261,7 +293,7 @@ button:disabled{
 }
 
 /* ======================================================
-   BARRE + REPÈRES
+   BARRE + REPÈRES + FLÈCHE SOUS LA BARRE (classe .barWrap)
    ====================================================== */
 
 .barWrap{
@@ -317,10 +349,6 @@ button:disabled{
   border-radius: 6px;
   z-index: 2;
 }
-
-/* ======================================================
-   FLÈCHE (sous la barre)
-   ====================================================== */
 
 .directionArrow{
   width: 360px;
@@ -412,26 +440,4 @@ body.compactUI .barWrap{
   width: min(1200px, 92vw);
   margin-left: auto;
   margin-right: auto;
-}
-
-/* ======================================================
-   COULEUR START / STOP
-   ====================================================== */
-
-#startBtn{
-  background: #2e7d32;
-  border-color: #2e7d32;
-  color: #ffffff;
-}
-
-#stopBtn{
-  background: #c62828;
-  border-color: #c62828;
-  color: #ffffff;
-}
-
-#startBtn:disabled,
-#stopBtn:disabled{
-  opacity: .5;
-  cursor: not-allowed;
 }
