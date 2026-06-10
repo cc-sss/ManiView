@@ -8,8 +8,8 @@
    AFFICHAGE DES INFORMATIONS SUR L'ÉTAT DU SYSTÈME (subclasse .readout)
    PICTOGRAMMES (subclasse .labels)
    BARRE + REPÈRES + FLÈCHE SOUS LA BARRE (classe .barWrap)
-   OVERLAY COMPTE À REBOURS
-   MODE COMPACT
+   COMPTE À REBOURS
+   MODE COMPACT ACTIVÉ (MISE EN PAGE)
    ====================================================== */
 
 
@@ -370,7 +370,7 @@ button:disabled{
 }
 
 /* ======================================================
-   OVERLAY COMPTE À REBOURS
+   COMPTE À REBOURS
    ====================================================== */
 
 .countdown{
@@ -401,7 +401,7 @@ button:disabled{
 }
 
 /* ======================================================
-   MODE COMPACT
+   MODE COMPACT ACTIVÉ (MISE EN PAGE)
    ====================================================== */
 
 .uiToggle{
