@@ -192,10 +192,6 @@ class CycleEngine {
     this._activeExp   = this._expMs;
   }
 
-  incrementCycleIndex() {
-    this._cycleIndex++;
-  }
-
   // Mise à zéro complet (après réinitialisation du cycle)
 
   reset() {
@@ -224,14 +220,11 @@ class AudioService {
     this._masterGain  = null; // Volume oui ou non
     this._noiseBuf    = null; // Bruit blanc (son à l'insufflation)
 
-    this._startAudioPerf = 0;
-    this._startAudioTime = 0;
-
     this._schedTimer  = null; // Minuteur du scheduler (vérifie si un son doit être joué)
     this._cycleStartAudioTime = 0;
 
     this._lastPlannedTingleTime = -Infinity;
-    this._lastPlanned = { tingleCycle: -1, beep3Cycle: -1, beep2Cycle: -1, beep1Cycle: -1 };
+    this._lastPlanned = { beep3Cycle: -1, beep2Cycle: -1, beep1Cycle: -1 };
   }
 
   // --- Initialisation / reprise du contexte audio ---
@@ -275,10 +268,7 @@ class AudioService {
   // Synchronisation de l'horloge audio avec avec l'horloge de la barre de progression
 
   // Avec le démarrage
-  syncOnStart(nowPerf, isResume, pausedPhaseMs) {
-    this._startAudioPerf = nowPerf;
-    this._startAudioTime = this._ctx.currentTime;
-
+  syncOnStart(isResume, pausedPhaseMs) {
     if (isResume) {
       this._cycleStartAudioTime = this._ctx.currentTime - (pausedPhaseMs / 1000);
     } else {
@@ -304,9 +294,6 @@ class AudioService {
     );
 
     this._lastPlannedTingleTime = -Infinity;
-
-    if (phaseMs > 50) this._lastPlanned.tingleCycle = engine.cycleIndex;
-    else              this._lastPlanned.tingleCycle = -1;
 
     if (engine.activeApneaMs >= 3000) {
       const ci = engine.cycleIndex;
@@ -418,8 +405,17 @@ class AudioService {
   }
 
   resetPlanned() { // Quand l'application est arrêté ou réinitialisé - efface la mémoire des sons déjà programmés
-    this._lastPlanned = { tingleCycle: -1, beep3Cycle: -1, beep2Cycle: -1, beep1Cycle: -1 };
+    this._lastPlanned = { beep3Cycle: -1, beep2Cycle: -1, beep1Cycle: -1 };
     this._lastPlannedTingleTime = -Infinity;
+  }
+
+  markPastCountdownBeeps(engine, phaseMs) {
+    const ci = engine.cycleIndex;
+    const ap = engine.activeApneaMs;
+
+    if (phaseMs >= ap - 3000) this._lastPlanned.beep3Cycle = ci;
+    if (phaseMs >= ap - 2000) this._lastPlanned.beep2Cycle = ci;
+    if (phaseMs >= ap - 1000) this._lastPlanned.beep1Cycle = ci;
   }
 
   schedulerTick(engine, beepEnabled) {
@@ -586,8 +582,11 @@ class UIController {
   }
 
   setStoppedState() {
-    this.startBtn.disabled    = false;
-    this.stopBtn.disabled     = true;
+    this.startBtn.disabled     = false;
+    this.stopBtn.disabled      = true;
+    this.resetBtn.disabled     = false;
+    this.nudgeBackBtn.disabled = true;
+    this.nudgeFwdBtn.disabled  = true;
   }
 
   setResetState() {
@@ -602,8 +601,8 @@ class UIController {
     this.startBtn.disabled     = false;
     this.stopBtn.disabled      = true;
     this.resetBtn.disabled     = false;
-    this.nudgeBackBtn.disabled = false;
-    this.nudgeFwdBtn.disabled  = false;
+    this.nudgeBackBtn.disabled = true;
+    this.nudgeFwdBtn.disabled  = true;
   }
 
   readApneaMs() {
@@ -747,18 +746,14 @@ class App {
 
     if (audioOk) {
       this._audio.unmute();
-      this._audio.syncOnStart(nowP, this._isPaused, this._pausedPhaseMs);
+      this._audio.syncOnStart(this._isPaused, this._pausedPhaseMs);
     }
 
     if (this._isPaused) {
       this._cycleStartPerf = nowP - this._pausedPhaseMs + this._engine.phaseOffsetMs;
 
       if (audioOk) {
-        const pm = this._pausedPhaseMs;
-        const ap = this._engine.apneaMs;
-        if (pm >= ap - 3000) this._audio._lastPlanned.beep3Cycle = this._engine.cycleIndex;
-        if (pm >= ap - 2000) this._audio._lastPlanned.beep2Cycle = this._engine.cycleIndex;
-        if (pm >= ap - 1000) this._audio._lastPlanned.beep1Cycle = this._engine.cycleIndex;
+        this._audio.markPastCountdownBeeps(this._engine, this._pausedPhaseMs);
       }
 
       this._isPaused = false;
@@ -769,12 +764,17 @@ class App {
       this._audio.resetPlanned();
     }
 
-    this._audio.startScheduler(
-      this._engine,
-      () => this._ui.isBeepEnabled()
-    );
-    this._audio.schedulerTick(this._engine, this._ui.isBeepEnabled());
+    if (audioOk) {
+      this._audio.startScheduler(
+        this._engine,
+        () => this._ui.isBeepEnabled()
+      );
+
+      this._audio.schedulerTick(this._engine, this._ui.isBeepEnabled());
+    }
+
     this._loop();
+
   }
 
   _stop() {
@@ -807,9 +807,13 @@ class App {
 
     this._isPaused      = false;
     this._pausedPhaseMs = 0;
-    this._engine.resetPhaseOffset();
+
+    this._engine.setApnea(this._ui.readApneaMs(), false);
+    this._engine.setExp(this._ui.readExpSecAsMs(), false);
+    this._engine.reset();
 
     this._countdown.hide();
+    this._bar.updateMarkers(this._engine);
     this._bar.render(0, this._engine);
     this._ui.setPhaseText("Stopped");
     this._ui.setResetState();
@@ -834,9 +838,11 @@ class App {
   }
 
   _nudge(deltaMs) {
+    if (!this._running) return;
+
     this._engine.nudge(deltaMs);
 
-    if (this._audio.isRunning && this._running) {
+    if (this._audio.isRunning) {
       this._audio.nudge(deltaMs);
       this._audio.recomputePlannedAfterNudge(this._engine);
       this._audio.schedulerTick(this._engine, this._ui.isBeepEnabled());
@@ -856,7 +862,7 @@ class App {
       const phaseCd = this._audio.getPhaseMs(this._engine);
       this._countdown.update(phaseCd, this._engine);
     } else {
-      this._countdown.hide();
+      this._countdown.update(phaseVis, this._engine);
     }
 
     // Rollover(s) de cycle

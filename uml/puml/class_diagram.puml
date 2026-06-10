@@ -24,8 +24,9 @@ class AppConfig <<static>> {
     +EXP_MAX_SEC: number = 600
     +NUDGE_MIN_SEC: number = 0.1
     +NUDGE_MAX_SEC: number = 0.4
-    +NUDGE_DEFAULT_SEC: number = 0.2
+    +APNEA_DEFAULT_SEC: number = 30.0
     +EXP_DEFAULT_SEC: number = 4.5
+    +NUDGE_DEFAULT_SEC: number = 0.2
     +AUDIO_START_OFFSET_SEC: number = 0.02
 }
 
@@ -61,7 +62,6 @@ class CycleEngine {
     +resetPhaseOffset(): void
     +onCycleRollover(): void
     +reset(): void
-    +incrementCycleIndex(): void
     +phaseToPct(phaseMs): number
 }
 
@@ -69,8 +69,6 @@ class AudioService {
     -_ctx: AudioContext | null
     -_masterGain: GainNode | null
     -_noiseBuf: AudioBuffer | null
-    -_startAudioPerf: number
-    -_startAudioTime: number
     -_schedTimer: number | null
     -_cycleStartAudioTime: number
     -_lastPlannedTingleTime: number
@@ -81,7 +79,8 @@ class AudioService {
     +cycleStartAudioTime: number
     --
     +ensure(): Promise<boolean>
-    +syncOnStart(nowPerf, isResume, pausedPhaseMs): void
+    +syncOnStart(isResume, pausedPhaseMs): void
+    +markPastCountdownBeeps(engine, phaseMs): void
     +advanceCycleStart(cycleDurationMs): void
     +nudge(deltaMs): void
     +unmute(): void
@@ -94,31 +93,32 @@ class AudioService {
     +getPhaseMs(engine): number
     -_getNoiseBuffer(): AudioBuffer
     -_playSoftBeepAt(t): void
-    -_planTingleAt(t): void
+    -_playCycleStartTingleAt(tStartAudio, durationSec): void
 }
 
 class BarRenderer {
-    -_fill: HTMLElement
-    -_marker3: HTMLElement
-    -_marker30: HTMLElement
-    -_sortieLabel: HTMLElement
-    -_arriveeLabel: HTMLElement
+    -_fillEl: HTMLElement
+    -_markerEl: HTMLElement
+    -_marker3El: HTMLElement
+    -_marker0El: HTMLElement
+    -_sortieLabelEl: HTMLElement
+    -_startLabelEl: HTMLElement
+    -_arriveeLabelEl: HTMLElement
     -_inspiStartLabel: HTMLElement
-    -_startLabel: HTMLElement
+    -_cycleTextEl: HTMLElement
+    -_tTextEl: HTMLElement
     --
     +updateMarkers(engine): void
     +render(phaseMs, engine): void
 }
 
 class CountdownController {
-    -_countdownEl: HTMLElement
-    -_countNumEl: HTMLElement
-    -_visible: boolean
-    -_lastCount: number
+    -_el: HTMLElement
+    -_numEl: HTMLElement
     --
     +update(phaseMs, engine): void
     +hide(): void
-    +show(): void
+    -_show(sec): void
 }
 
 class UIController {
@@ -133,9 +133,7 @@ class UIController {
     +nudgeFwdBtn: HTMLButtonElement
     +uiToggleBtn: HTMLButtonElement
     +beepEnabled: HTMLInputElement
-    +phaseText: HTMLElement
-    +tText: HTMLElement
-    +cycleText: HTMLElement
+    -_phaseTextEl: HTMLElement
     +nudgeMs: number
     --
     +readApneaMs(): number
@@ -144,7 +142,7 @@ class UIController {
     +setStoppedState(): void
     +setResetState(): void
     +setJumpSortieState(): void
-    +setPhaseText(phase): void
+    +setPhaseText(text): void
     +isBeepEnabled(): boolean
     +toggleCompactUI(): void
     +bindEvents(handlers): void
@@ -182,13 +180,18 @@ App *-- "1" CountdownController
 App *-- "1" UIController
 
 ' Dépendances
-App ..> AppConfig : uses
 App ..> Helpers : uses
 CycleEngine ..> AppConfig : uses
 CycleEngine ..> Helpers : uses
 AudioService ..> AppConfig : uses
 UIController ..> Helpers : uses
 UIController ..> AppConfig : uses
+AudioService ..> Helpers : uses
+BarRenderer ..> AppConfig : uses
+BarRenderer ..> Helpers : uses
+BarRenderer ..> CycleEngine : uses
+AudioService ..> CycleEngine : uses
+CountdownController ..> CycleEngine : uses
 
 note right of App
   Point d'entrée principal.

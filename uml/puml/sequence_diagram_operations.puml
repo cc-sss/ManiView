@@ -19,7 +19,7 @@ participant "CountdownController" as Countdown
 
 Utilisateur -> UI: Clique sur "Stop"
 activate UI
-UI -> App: onStop()
+UI -> App: _stop()
 activate App
 
 App -> App: nowPerf = performance.now()
@@ -29,7 +29,7 @@ activate Engine
 Engine --> App: phaseMs
 deactivate Engine
 
-App -> App: _pausedPhaseMs = clampNumber(phaseMs)
+App -> App: _pausedPhaseMs = clampNumber(phaseMs, 0, cycleDurationMs)
 App -> App: _isPaused = true
 App -> App: _running = false
 
@@ -38,8 +38,7 @@ activate UI
 UI -> UI: Active bouton Start\nDésactive bouton Stop\nDésactive boutons Nudge
 deactivate UI
 
-App -> App: _cancelLoop()
-App -> App: cancelAnimationFrame(_rafId)
+App -> App: _cancelLoop()\n(cancelAnimationFrame si _rafId existe)
 
 App -> Audio: stopScheduler()
 activate Audio
@@ -71,7 +70,7 @@ deactivate UI
 
 Utilisateur -> UI: Clique sur "Réinitialiser"
 activate UI
-UI -> App: onReset()
+UI -> App: _reset()
 activate App
 
 App -> App: _running = false
@@ -88,14 +87,47 @@ deactivate Audio
 App -> App: _isPaused = false
 App -> App: _pausedPhaseMs = 0
 
-App -> Engine: resetPhaseOffset()
+App -> UI: readApneaMs()
+activate UI
+UI --> App: apneaMs
+deactivate UI
+
+App -> UI: readExpSecAsMs()
+activate UI
+UI --> App: expMs
+deactivate UI
+
+App -> Engine: setApnea(apneaMs, false)
+activate Engine
+Engine -> Engine: _apneaMs = apneaMs
+Engine -> Engine: _activeApnea = apneaMs
+deactivate Engine
+
+App -> Engine: setExp(expMs, false)
+activate Engine
+Engine -> Engine: _expMs = expMs
+Engine -> Engine: _activeExp = expMs
+deactivate Engine
+
+App -> Engine: reset()
 activate Engine
 Engine -> Engine: _phaseOffsetMs = 0
+Engine -> Engine: _cycleIndex = 0
+Engine -> Engine: _pendingApnea = null
+Engine -> Engine: _pendingExp = null
+Engine -> Engine: _hasPending = false
+Engine -> Engine: _activeApnea = _apneaMs
+Engine -> Engine: _activeExp = _expMs
 deactivate Engine
 
 App -> Countdown: hide()
 activate Countdown
 deactivate Countdown
+
+App -> Bar: updateMarkers(engine)
+activate Bar
+Bar -> Bar: Recalcule les marqueurs
+deactivate Bar
 
 App -> Bar: render(0, engine)
 activate Bar
@@ -118,7 +150,7 @@ deactivate UI
 
 Utilisateur -> UI: Clique sur "Saut → Sortie"
 activate UI
-UI -> App: onJumpSortie()
+UI -> App: _jumpToSortie()
 activate App
 
 App -> App: _running = false
@@ -132,7 +164,7 @@ App -> Audio: mute()
 activate Audio
 deactivate Audio
 
-App -> Engine: apneaMs
+App -> Engine: get apneaMs
 activate Engine
 Engine --> App: apneaMs
 deactivate Engine
@@ -144,7 +176,7 @@ App -> Engine: resetPhaseOffset()
 activate Engine
 deactivate Engine
 
-App -> App: _cycleStartPerf = now - pausedPhaseMs
+App -> App: _cycleStartPerf = performance.now() - _pausedPhaseMs
 
 App -> Countdown: hide()
 activate Countdown
@@ -152,7 +184,7 @@ deactivate Countdown
 
 App -> Bar: render(_pausedPhaseMs, engine)
 activate Bar
-Bar -> Bar: Positionne à la sortie (70%)
+Bar -> Bar: Positionne la barre au début de la sortie
 deactivate Bar
 
 App -> UI: setPhaseText("Stopped")
@@ -171,36 +203,44 @@ deactivate UI
 
 Utilisateur -> UI: Clique sur "+ Nudge" ou "- Nudge"
 activate UI
-UI -> App: onNudgeFwd(nudgeStepMs) ou onNudgeBack(-nudgeStepMs)
+UI -> App: _nudge(deltaMs)
 activate App
 
-App -> Engine: nudge(deltaMs)
-activate Engine
-Engine -> Engine: _phaseOffsetMs += deltaMs
-deactivate Engine
+alt Application arrêtée (_running == false)
+    App -> App: return
+else Application en fonctionnement (_running == true)
 
-alt Si audio en cours et running
-    App -> Audio: nudge(deltaMs)
-    activate Audio
-    Audio -> Audio: _cycleStartAudioTime -= deltaMs / 1000
-    deactivate Audio
-    
-    App -> Audio: recomputePlannedAfterNudge(engine)
-    activate Audio
-    Audio -> Audio: Recalcule événements planifiés\naprès le décalage
-    deactivate Audio
-    
-    App -> Audio: schedulerTick(engine, isBeepEnabled)
-    activate Audio
-    Audio -> Audio: Re-planifie beeps et tingles
-    deactivate Audio
+    App -> App: deltaMs = ± _ui.nudgeMs
+
+    App -> Engine: nudge(deltaMs)
+    activate Engine
+    Engine -> Engine: _phaseOffsetMs += deltaMs
+    deactivate Engine
+
+    alt Si audio en cours et running
+        App -> Audio: nudge(deltaMs)
+        activate Audio
+        Audio -> Audio: _cycleStartAudioTime -= deltaMs / 1000
+        deactivate Audio
+        
+        App -> Audio: recomputePlannedAfterNudge(engine)
+        activate Audio
+        Audio -> Audio: Recalcule événements planifiés\naprès le décalage
+        deactivate Audio
+        
+        App -> Audio: schedulerTick(engine, isBeepEnabled)
+        activate Audio
+        Audio -> Audio: Re-planifie beeps et tingles
+        deactivate Audio
+    end
+
+    note over App, Audio
+      Le nudge permet de décaler
+      la synchronisation sans
+      redémarrer le cycle
+    end note
+
 end
-
-note over App, Audio
-  Le nudge permet de décaler
-  la synchronisation sans
-  redémarrer le cycle
-end note
 
 deactivate App
 deactivate UI
@@ -233,6 +273,11 @@ else Si _running == false
     Bar -> Bar: Recalcule immédiatement\nles positions
     deactivate Bar
 end
+
+note over UI, Engine
+  Le même principe s'applique à la durée d'expiration :
+  readExpSecAsMs() puis setExp(nouvelleValeur, _running).
+end note
 
 deactivate Engine
 deactivate App

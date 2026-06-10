@@ -19,7 +19,7 @@ participant "CountdownController" as Countdown
 
 Utilisateur -> UI: Clique sur "Start"
 activate UI
-UI -> App: onStart()
+UI -> App: _start()
 activate App
 
 App -> UI: readApneaMs()
@@ -72,7 +72,7 @@ activate Audio
 Audio -> Audio: Crée AudioContext si nécessaire
 Audio -> Audio: Resume le contexte
 Audio -> Audio: Crée MasterGain
-Audio --> App: audioOk = true
+Audio --> App: audioOk
 deactivate Audio
 
 App -> Audio: unmute()
@@ -80,11 +80,13 @@ activate Audio
 Audio -> Audio: gain.setValueAtTime(1, currentTime)
 deactivate Audio
 
-App -> Audio: syncOnStart(nowPerf, isPaused, pausedPhaseMs)
+App -> Audio: syncOnStart(_isPaused, _pausedPhaseMs)
 activate Audio
-Audio -> Audio: _startAudioPerf = nowPerf
-Audio -> Audio: _startAudioTime = ctx.currentTime
-Audio -> Audio: _cycleStartAudioTime = currentTime + offset
+alt Reprise depuis pause
+    Audio -> Audio: _cycleStartAudioTime = currentTime - pausedPhaseMs / 1000
+else Démarrage frais
+    Audio -> Audio: _cycleStartAudioTime = currentTime + AUDIO_START_OFFSET_SEC
+end
 deactivate Audio
 
 == Démarrage du Cycle ==
@@ -104,8 +106,9 @@ alt Démarrage frais (non en pause)
     Audio -> Audio: Réinitialise les événements\naudio planifiés
     deactivate Audio
 else Reprise depuis pause
-    App -> App: _cycleStartPerf = now - pausedPhaseMs
-    App -> Audio: Marque les beeps passés\ncomme planifiés
+    App -> App: _cycleStartPerf = nowP - _pausedPhaseMs + engine.phaseOffsetMs
+    App -> Audio: markPastCountdownBeeps(engine, _pausedPhaseMs)
+    App -> App: _isPaused = false
 end
 
 App -> Audio: startScheduler(engine, isBeepEnabledFn)
@@ -129,15 +132,20 @@ loop Tant que _running == true
     App -> Engine: computePhaseMs(nowPerf, cycleStartPerf)
     activate Engine
     Engine -> Engine: phaseMs = (nowPerf - cycleStartPerf)\n+ phaseOffsetMs
-    Engine --> App: phaseMs
+    Engine --> App: phaseVis
     deactivate Engine
     
-    App -> Audio: getPhaseMs(engine)
-    activate Audio
-    Audio --> App: phaseCd (phase audio)
-    deactivate Audio
-    
-    App -> Countdown: update(phaseCd, engine)
+    alt Audio disponible
+        App -> Audio: getPhaseMs(engine)
+        activate Audio
+        Audio --> App: phaseCd
+        deactivate Audio
+
+        App -> Countdown: update(phaseCd, engine)
+    else Audio non disponible
+        App -> Countdown: update(phaseVis, engine)
+    end
+
     activate Countdown
     Countdown -> Engine: activeApneaMs
     Countdown -> Countdown: Calcule compte à rebours
@@ -149,9 +157,9 @@ loop Tant que _running == true
     end
     deactivate Countdown
     
-    alt phaseMs >= cycleDurationMs (Rollover)
-        loop Tant que phaseMs >= cycleDurationMs
-            App -> App: phaseMs -= cycleDurationMs
+    alt phaseVis >= cycleDurationMs (Rollover)
+        loop Tant que phaseVis >= cycleDurationMs
+            App -> App: phaseVis -= cycleDurationMs
             App -> App: _cycleStartPerf += cycleDurationMs
             
             App -> Audio: advanceCycleStart(cycleDurationMs)
@@ -182,7 +190,7 @@ loop Tant que _running == true
         end
     end
     
-    App -> Bar: render(phaseMs, engine)
+    App -> Bar: render(phaseVis, engine)
     activate Bar
     Bar -> Engine: phaseToPct(phaseMs)
     activate Engine
