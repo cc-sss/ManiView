@@ -22,36 +22,46 @@ activate UI
 UI -> App: _start()
 activate App
 
-App -> UI: readApneaMs()
-activate UI
-UI --> App: apneaMs
-deactivate UI
+alt Démarrage frais (_isPaused == false)
+    App -> UI: readApneaMs()
+    activate UI
+    UI --> App: apneaMs
+    deactivate UI
 
-App -> UI: readExpSecAsMs()
-activate UI
-UI --> App: expMs
-deactivate UI
+    App -> UI: readExpSecAsMs()
+    activate UI
+    UI --> App: expMs
+    deactivate UI
 
-App -> Engine: setApnea(apneaMs, false)
-activate Engine
-Engine -> Engine: _apneaMs = apneaMs
-Engine -> Engine: _activeApnea = apneaMs
-deactivate Engine
+    App -> Engine: setApnea(apneaMs, false)
+    activate Engine
+    Engine -> Engine: _apneaMs = apneaMs
+    Engine -> Engine: _activeApnea = apneaMs
+    deactivate Engine
 
-App -> Engine: setExp(expMs, false)
-activate Engine
-Engine -> Engine: _expMs = expMs
-Engine -> Engine: _activeExp = expMs
-deactivate Engine
+    App -> Engine: setExp(expMs, false)
+    activate Engine
+    Engine -> Engine: _expMs = expMs
+    Engine -> Engine: _activeExp = expMs
+    deactivate Engine
 
-App -> Bar: updateMarkers(engine)
-activate Bar
-Bar -> Engine: activeApneaMs
-Engine --> Bar: valeur
-Bar -> Engine: activeExpMs
-Engine --> Bar: valeur
-Bar -> Bar: Positionne les marqueurs\nvisuels sur la barre
-deactivate Bar
+    App -> Bar: updateMarkers(engine)
+    activate Bar
+    Bar -> Engine: activeApneaMs
+    Engine --> Bar: valeur
+    Bar -> Engine: activeExpMs
+    Engine --> Bar: valeur
+    Bar -> Bar: Positionne les marqueurs\nvisuels sur la barre
+    deactivate Bar
+
+else Reprise depuis pause (_isPaused == true)
+    note over App, Engine
+      Les paramètres affichés ne sont pas appliqués
+      immédiatement afin de préserver le cycle en pause.
+      Les éventuelles nouvelles valeurs restent en attente
+      jusqu'au prochain rollover.
+    end note
+end
 
 App -> App: _running = true
 

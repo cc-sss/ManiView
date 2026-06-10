@@ -29,9 +29,17 @@ activate Engine
 Engine --> App: phaseMs
 deactivate Engine
 
-App -> App: _pausedPhaseMs = clampNumber(phaseMs, 0, cycleDurationMs)
+App -> App: _pausedPhaseMs = clampNumber(phaseMs)
 App -> App: _isPaused = true
 App -> App: _running = false
+
+note over App
+  Après Stop, _running devient false,
+  mais _isPaused reste true.
+  Le cycle peut donc être repris
+  sans appliquer immédiatement
+  les paramètres modifiés.
+end note
 
 App -> UI: setStoppedState()
 activate UI
@@ -193,7 +201,7 @@ deactivate UI
 
 App -> UI: setJumpSortieState()
 activate UI
-UI -> UI: Active bouton Start
+UI -> UI: Active bouton Start et Reset\nDésactive Stop et boutons Nudge
 deactivate UI
 
 deactivate App
@@ -245,11 +253,11 @@ end
 deactivate App
 deactivate UI
 
-== Scénario 5: Changement de Paramètres en Cours ==
+== Scénario 5: Changement de Paramètres ==
 
 Utilisateur -> UI: Modifie durée d'apnée
 activate UI
-UI -> App: onApneaChange()
+UI -> App: _onApneaChange()
 activate App
 
 App -> UI: readApneaMs()
@@ -257,17 +265,23 @@ activate UI
 UI --> App: nouvelleValeur
 deactivate UI
 
-App -> Engine: setApnea(nouvelleValeur, _running)
+App -> App: deferChange = _running || _isPaused
+
+App -> Engine: setApnea(nouvelleValeur, deferChange)
 activate Engine
 
-alt Si _running == true
+alt Si deferChange == true\n(application en marche ou en pause)
     Engine -> Engine: _pendingApnea = nouvelleValeur
     Engine -> Engine: _hasPending = true
-    note right: Sera appliqué au\nprochain rollover
-else Si _running == false
+    note right
+      La nouvelle valeur est gardée
+      en attente et sera appliquée
+      au prochain rollover.
+    end note
+else Si deferChange == false\n(application réinitialisée ou avant démarrage)
     Engine -> Engine: _apneaMs = nouvelleValeur
     Engine -> Engine: _activeApnea = nouvelleValeur
-    
+
     App -> Bar: updateMarkers(engine)
     activate Bar
     Bar -> Bar: Recalcule immédiatement\nles positions
@@ -276,7 +290,8 @@ end
 
 note over UI, Engine
   Le même principe s'applique à la durée d'expiration :
-  readExpSecAsMs() puis setExp(nouvelleValeur, _running).
+  _onExpChange(), readExpSecAsMs(),
+  puis setExp(nouvelleValeur, deferChange).
 end note
 
 deactivate Engine

@@ -55,8 +55,8 @@ class CycleEngine {
     +phaseOffsetMs: number
     +cycleIndex: number
     --
-    +setApnea(ms, isRunning): void
-    +setExp(ms, isRunning): void
+    +setApnea(ms, deferChange): void
+    +setExp(ms, deferChange): void
     +computePhaseMs(nowPerf, cycleStartPerf): number
     +nudge(deltaMs): void
     +resetPhaseOffset(): void
@@ -205,6 +205,7 @@ note right of CycleEngine
   - Timing des phases
   - Rollover de cycle
   - Nudge temporel
+  - Paramètres en attente si cycle actif ou en pause
   - Calcul pourcentage de progression
 end note
 

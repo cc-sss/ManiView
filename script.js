@@ -715,16 +715,22 @@ class App {
 
   _onApneaChange() {
     const ms = this._ui.readApneaMs();
-    this._engine.setApnea(ms, this._running);
-    if (!this._running) {
+    const deferChange = this._running || this._isPaused;
+
+    this._engine.setApnea(ms, deferChange);
+
+    if (!deferChange) {
       this._bar.updateMarkers(this._engine);
     }
   }
 
   _onExpChange() {
     const ms = this._ui.readExpSecAsMs();
-    this._engine.setExp(ms, this._running);
-    if (!this._running) {
+    const deferChange = this._running || this._isPaused;
+
+    this._engine.setExp(ms, deferChange);
+
+    if (!deferChange) {
       this._bar.updateMarkers(this._engine);
     }
   }
@@ -732,10 +738,13 @@ class App {
   // Actions principales
 
   async _start() {
+    
     // Lecture des paramètres courants
-    this._engine.setApnea(this._ui.readApneaMs(), false);
-    this._engine.setExp(this._ui.readExpSecAsMs(), false);
-    this._bar.updateMarkers(this._engine);
+    if (!this._isPaused) {
+      this._engine.setApnea(this._ui.readApneaMs(), false);
+      this._engine.setExp(this._ui.readExpSecAsMs(), false);
+      this._bar.updateMarkers(this._engine);
+    }
 
     this._running = true;
     this._ui.setRunningState();
