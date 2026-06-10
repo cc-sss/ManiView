@@ -3,7 +3,7 @@
 // ======================================================
 // AppConfig + Helpers
 // CycleEngine 
-// AudioService — gestion du son et de la planification audio
+// AudioService
 // BarRenderer — rendu visuel de la barre et des labels
 // CountdownController — gestion de l’overlay de compte à rebours
 // UIController — gestion du DOM, des boutons et des champs de saisie
@@ -211,24 +211,25 @@ class CycleEngine {
 }
 
 // ======================================================
-// AudioService — Web Audio API, scheduler lookahead
+// AudioService — classe qui gère la dimension auditive 
 // ======================================================
 
 class AudioService {
-  constructor() {
-    this._ctx         = null;
-    this._masterGain  = null;
-    this._noiseBuf    = null;
+  
+  // Variables audio
 
-    // Synchronisation temps perf ↔ temps audio
+  constructor() {
+
+    this._ctx         = null; // Contexte audio --> créer ou pas l'audio
+    this._masterGain  = null; // Volume oui ou non
+    this._noiseBuf    = null; // Bruit blanc (son à l'insufflation)
+
     this._startAudioPerf = 0;
     this._startAudioTime = 0;
 
-    // Scheduler
-    this._schedTimer  = null;
+    this._schedTimer  = null; // Minuteur du scheduler (vérifie si un son doit être joué)
     this._cycleStartAudioTime = 0;
 
-    // Anti-doublon
     this._lastPlannedTingleTime = -Infinity;
     this._lastPlanned = { tingleCycle: -1, beep3Cycle: -1, beep2Cycle: -1, beep1Cycle: -1 };
   }
@@ -250,20 +251,30 @@ class AudioService {
     return this._ctx.state === "running";
   }
 
-  get isRunning() {
+  // Les "getters" audio
+
+  get isRunning() { // Est ce que l'audio fonctionne?
     return this._ctx && this._ctx.state === "running";
   }
 
-  get currentTime() {
+  get currentTime() { // Renvoie le temps actuel de l’horloge audio
     return this._ctx ? this._ctx.currentTime : 0;
   }
 
-  get cycleStartAudioTime() {
+  get cycleStartAudioTime() { // Renvoie le moment audio où le cycle a commencé
     return this._cycleStartAudioTime;
   }
 
-  // --- Synchronisation avec le moteur de cycle ---
+  // Fonction qui calcule la phase actuelle selon l’horloge audio
 
+  getPhaseMs(engine) {
+    const raw = (this._ctx.currentTime - this._cycleStartAudioTime) * 1000;
+    return Helpers.mod(Math.max(0, raw), engine.cycleDurationMs);
+  }
+
+  // Synchronisation de l'horloge audio avec avec l'horloge de la barre de progression
+
+  // Avec le démarrage
   syncOnStart(nowPerf, isResume, pausedPhaseMs) {
     this._startAudioPerf = nowPerf;
     this._startAudioTime = this._ctx.currentTime;
@@ -275,17 +286,37 @@ class AudioService {
     }
   }
 
+  // Avec le cycle suivant
   advanceCycleStart(cycleDurationMs) {
     this._cycleStartAudioTime += cycleDurationMs / 1000;
   }
 
-  // --- Nudge (décalage audio synchronisé) ---
-
+  // Pour tenir compte des décalages temporels induits par le nudge 
   nudge(deltaMs) {
     this._cycleStartAudioTime -= deltaMs / 1000;
   }
 
-  // --- Gestion du gain ---
+  // Éviter les sons incohérents après un nudge
+  recomputePlannedAfterNudge(engine) {
+    const phaseMs = Helpers.mod(
+      (this._ctx.currentTime - this._cycleStartAudioTime) * 1000,
+      engine.cycleDurationMs
+    );
+
+    this._lastPlannedTingleTime = -Infinity;
+
+    if (phaseMs > 50) this._lastPlanned.tingleCycle = engine.cycleIndex;
+    else              this._lastPlanned.tingleCycle = -1;
+
+    if (engine.activeApneaMs >= 3000) {
+      const ci = engine.cycleIndex;
+      this._lastPlanned.beep3Cycle = (phaseMs >= engine.activeApneaMs - 3000) ? ci : -1;
+      this._lastPlanned.beep2Cycle = (phaseMs >= engine.activeApneaMs - 2000) ? ci : -1;
+      this._lastPlanned.beep1Cycle = (phaseMs >= engine.activeApneaMs - 1000) ? ci : -1;
+    }
+  }
+
+  // Volume
 
   unmute() {
     if (!this.isRunning || !this._masterGain) return;
@@ -298,7 +329,7 @@ class AudioService {
     this._masterGain.gain.setValueAtTime(0, this._ctx.currentTime);
   }
 
-  // --- Buffer de bruit blanc (lazy) ---
+  // Génération des sons
 
   _getNoiseBuffer() {
     if (this._noiseBuf) return this._noiseBuf;
@@ -310,8 +341,6 @@ class AudioService {
     this._noiseBuf = buf;
     return buf;
   }
-
-  // --- Sons ---
 
   _playSoftBeepAt(t) {
     if (!this.isRunning || !this._masterGain) return;
@@ -370,21 +399,29 @@ class AudioService {
     lfo.stop(t1 + 0.02);
   }
 
-  // --- Scheduler lookahead ---
+  // Scheduler audio
+  // N.B. Toutes les 25 ms, le js regarde 150ms dans le futur et si il voit que un son doit bientôt arriver, il le programme à l'avance
 
-  resetPlanned() {
+  startScheduler(engine, beepEnabledFn) {
+    this.stopScheduler();
+    this._schedTimer = setInterval(
+      () => this.schedulerTick(engine, beepEnabledFn()),
+      AppConfig.SCHED_INTERVAL_MS
+    );
+  }
+
+  stopScheduler() { // Quand l'application est arrêté ou réinitialisé - arrête le scheduler
+    if (this._schedTimer) {
+      clearInterval(this._schedTimer);
+      this._schedTimer = null;
+    }
+  }
+
+  resetPlanned() { // Quand l'application est arrêté ou réinitialisé - efface la mémoire des sons déjà programmés
     this._lastPlanned = { tingleCycle: -1, beep3Cycle: -1, beep2Cycle: -1, beep1Cycle: -1 };
     this._lastPlannedTingleTime = -Infinity;
   }
 
-  resetPlannedTingle() {
-    this._lastPlannedTingleTime = -Infinity;
-  }
-
-  /**
-   * @param {CycleEngine} engine
-   * @param {boolean} beepEnabled
-   */
   schedulerTick(engine, beepEnabled) {
     if (!this.isRunning) return;
     if (!beepEnabled) return;
@@ -402,7 +439,7 @@ class AudioService {
       this._lastPlannedTingleTime = tTingle;
     }
 
-    // Beeps de décompte (3, 2, 1 s avant fin d'apnée)
+    // Bips de décompte
     if (engine.activeApneaMs >= 3000) {
       const t3 = this._cycleStartAudioTime + (engine.activeApneaMs - 3000) / 1000;
       const t2 = this._cycleStartAudioTime + (engine.activeApneaMs - 2000) / 1000;
@@ -424,54 +461,16 @@ class AudioService {
     }
   }
 
-  startScheduler(engine, beepEnabledFn) {
-    this.stopScheduler();
-    this._schedTimer = setInterval(
-      () => this.schedulerTick(engine, beepEnabledFn()),
-      AppConfig.SCHED_INTERVAL_MS
-    );
-  }
-
-  stopScheduler() {
-    if (this._schedTimer) {
-      clearInterval(this._schedTimer);
-      this._schedTimer = null;
-    }
-  }
-
-  // --- Helpers pour la resynchronisation après nudge ---
-
-  recomputePlannedAfterNudge(engine) {
-    const phaseMs = Helpers.mod(
-      (this._ctx.currentTime - this._cycleStartAudioTime) * 1000,
-      engine.cycleDurationMs
-    );
-
-    this._lastPlannedTingleTime = -Infinity;
-
-    if (phaseMs > 50) this._lastPlanned.tingleCycle = engine.cycleIndex;
-    else              this._lastPlanned.tingleCycle = -1;
-
-    if (engine.activeApneaMs >= 3000) {
-      const ci = engine.cycleIndex;
-      this._lastPlanned.beep3Cycle = (phaseMs >= engine.activeApneaMs - 3000) ? ci : -1;
-      this._lastPlanned.beep2Cycle = (phaseMs >= engine.activeApneaMs - 2000) ? ci : -1;
-      this._lastPlanned.beep1Cycle = (phaseMs >= engine.activeApneaMs - 1000) ? ci : -1;
-    }
-  }
-
-  getPhaseMs(engine) {
-    const raw = (this._ctx.currentTime - this._cycleStartAudioTime) * 1000;
-    return Helpers.mod(Math.max(0, raw), engine.cycleDurationMs);
-  }
 }
 
-
-// ======================================================
-// BarRenderer — rendu visuel de la barre et des labels
-// ======================================================
+// ===========================================================================================
+// BarRenderer — classe qui gère le rendu visuel de la barre de progrssion et des pictogrammes
+// ===========================================================================================
 
 class BarRenderer {
+
+  // Variables
+
   constructor() {
     this._fillEl          = document.getElementById("fill");
     this._markerEl        = document.getElementById("marker30");
@@ -485,10 +484,9 @@ class BarRenderer {
     this._tTextEl         = document.getElementById("tText");
   }
 
-  /**
-   * Met à jour les positions des repères selon le moteur de cycle.
-   * @param {CycleEngine} engine
-   */
+  // Fonction qui met à jour les positions des repères selon le CycleEngine
+   
+  // Place des repères fixes
   updateMarkers(engine) {
     const pct3 = engine.phaseToPct(3000);
 
@@ -506,11 +504,7 @@ class BarRenderer {
     this._cycleTextEl.textContent = `Cycle = ${Helpers.formatSec(engine.cycleDurationMs)} s`;
   }
 
-  /**
-   * Rend la barre à une position de phase donnée.
-   * @param {number} phaseMs
-   * @param {CycleEngine} engine
-   */
+  // Met a jour la barre pendant que le temps avance
   render(phaseMs, engine) {
     const widthPct = engine.phaseToPct(phaseMs);
     this._fillEl.style.width      = `${widthPct.toFixed(6)}%`;
@@ -895,7 +889,7 @@ class App {
 
 
 // ======================================================
-// Point d’entrée - Lancement de l'application
+// Lancement de l'application (Point d’entrée)
 // ======================================================
 
 const app = new App();
