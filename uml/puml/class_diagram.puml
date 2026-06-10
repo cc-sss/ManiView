@@ -18,8 +18,8 @@ class AppConfig <<static>> {
     +MIN_SAFETY_SEC: number = 0.01
     +NOISE_DURATION_SEC: number = 3
     +BEEP_FREQ_HZ: number = 440
-    +APNEA_MIN_SEC: number = 1
-    +APNEA_MAX_SEC: number = 1800
+    +APNEA_MIN_SEC: number = 10
+    +APNEA_MAX_SEC: number = 30
     +EXP_MIN_SEC: number = 0
     +EXP_MAX_SEC: number = 600
     +NUDGE_MIN_SEC: number = 0.1

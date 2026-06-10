@@ -1,8 +1,27 @@
-"use strict";
+// ======================================================
+// STRUCTURE DU FICHIER
+// ======================================================
+// AppConfig + Helpers
+// CycleEngine 
+// AudioService — gestion du son et de la planification audio
+// BarRenderer — rendu visuel de la barre et des labels
+// CountdownController — gestion de l’overlay de compte à rebours
+// UIController — gestion du DOM, des boutons et des champs de saisie
+// App — orchestrateur principal
+//   - Initialisation
+//   - Handlers d’inputs
+//   - Actions principales
+//   - Boucle d’animation
+// Point d’entrée - Lancement de l'application
+// ======================================================
+
+"use strict"; //force js à exécuter le code avec des règles strictes
 
 // ======================================================
-// AppConfig — Constantes de configuration globales
+// AppConfig + Helpers
 // ======================================================
+
+// Paramètres de réglage de l'application (AppConfig)
 
 const AppConfig = Object.freeze({
   MARKER_PCT:        70,
@@ -12,8 +31,8 @@ const AppConfig = Object.freeze({
   MIN_SAFETY_SEC:    0.01,
   NOISE_DURATION_SEC: 3,
   BEEP_FREQ_HZ:      440,
-  APNEA_MIN_SEC:     1,
-  APNEA_MAX_SEC:     1800,
+  APNEA_MIN_SEC:     10,
+  APNEA_MAX_SEC:     30,
   EXP_MIN_SEC:       0,
   EXP_MAX_SEC:       10 * 60,
   NUDGE_MIN_SEC:     0.1,
@@ -24,12 +43,10 @@ const AppConfig = Object.freeze({
   AUDIO_START_OFFSET_SEC: 0.02,
 });
 
-
-// ======================================================
-// Helpers — fonctions utilitaires pures
-// ======================================================
+// Helpers : Fonctions utiles, utilisées autre part dans le code
 
 const Helpers = Object.freeze({
+
   clampNumber(v, min, max) {
     const n = Number(String(v).replace(",", "."));
     if (!Number.isFinite(n)) return min;
@@ -43,29 +60,42 @@ const Helpers = Object.freeze({
   mod(a, n) {
     return ((a % n) + n) % n;
   },
+
 });
 
-
-// ======================================================
-// CycleEngine — logique du cycle (phases, timings, nudge)
-// ======================================================
+// ===================================================================================================
+// CycleEngine — moteur logique du cycle ventilatoire ("Ou doit se trouver la barre de progression ?")
+// ===================================================================================================
 
 class CycleEngine {
+
+  // Les valeurs Thaut/Tbas
+
   constructor() {
+
+    // Valeurs par défaut
     this._apneaMs      = AppConfig.APNEA_DEFAULT_SEC * 1000;
     this._expMs        = AppConfig.EXP_DEFAULT_SEC * 1000;
+
+    // Valeurs utilisées pour le cycle en cours
     this._activeApnea  = this._apneaMs;
     this._activeExp    = this._expMs;
 
-    this._pendingApnea = null;
-    this._pendingExp   = null;
-    this._hasPending   = false;
+    // Valeurs en attente pour le cycle suivant (--> lorsque l'utilisateur change Thaut/Tbas pendant que le cycle tourne)
+    this._pendingApnea = null; // Nouvelle durée d’apnée en attente
+    this._pendingExp   = null; // Nouvelle durée d'expi en attente
+    this._hasPending   = false; // Indique s’il y a au moins un changement en attente
 
+    // Décalage temporel crée par le nudge 
     this._phaseOffsetMs = 0;
+
+    // Compteur de cycle - permet surtout d'éviter que les sons soient planifiés plusieurs fois dans le même cycle 
     this._cycleIndex    = 0;
+
   }
 
-  // --- Getters publics ---
+  // Les "getters"  - permettent aux autres parties du programme de lire ces valeurs proprement, 
+  // sans accéder directement à la variable interne ni contourner la logique prévue pour modifier les durées
 
   get apneaMs()      { return this._apneaMs; }
   get expMs()        { return this._expMs; }
@@ -75,82 +105,56 @@ class CycleEngine {
   get phaseOffsetMs()   { return this._phaseOffsetMs; }
   get cycleIndex()      { return this._cycleIndex; }
 
-  // --- Setters avec gestion des changements en cours ---
+  // Les "setters" - modifient la durée de Thaut et Tbas en fonction de ce qui est encodé par l'utilisateur
+  // N.B. ms = nouvelle apnée en ms; isRunning = indique si l'application est en train de tourner ou non
 
+  // Modifie le temps d'apnée assistée (Thaut) 
   setApnea(ms, isRunning) {
     const value = Helpers.clampNumber(ms, AppConfig.APNEA_MIN_SEC * 1000, AppConfig.APNEA_MAX_SEC * 1000);
-    if (isRunning) {
-      this._pendingApnea = value;
-      this._hasPending   = true;
-    } else {
+    if (isRunning) { // Si l'application tourne
+      this._pendingApnea = value; // La valeur est une valeur à appliquer au cycle suivant
+      this._hasPending   = true; // Il y'a un changement en attente
+    } else { // Si l'application ne tourne pas
       this._apneaMs     = value;
       this._activeApnea = value;
     }
   }
 
+  // Modifie le temps d'expi (Tbas) 
   setExp(ms, isRunning) {
     const value = Helpers.clampNumber(ms, AppConfig.EXP_MIN_SEC * 1000, AppConfig.EXP_MAX_SEC * 1000);
-    if (isRunning) {
+    if (isRunning) { // Si l'application tourne
       this._pendingExp = value;
       this._hasPending = true;
-    } else {
-      this._expMs     = value;
+    } else { // Si l'application ne tourne pas
+      this._expMs     = value; // Valeur est appliquée directement
       this._activeExp = value;
     }
   }
 
-  // --- Calcul de la phase visuelle ---
+  // Fonction qui calcule où on est dans le cycle
 
   computePhaseMs(nowPerf, cycleStartPerf) {
     return (nowPerf - cycleStartPerf) + this._phaseOffsetMs;
   }
 
-  // --- Nudge (décalage de phase) ---
+  // Fonction qui applique le nudge (décalage temporel)
 
   nudge(deltaMs) {
     this._phaseOffsetMs += deltaMs;
   }
 
+  // Fonction qui remet le décalage apporté par le nudge à zéro
+
   resetPhaseOffset() {
     this._phaseOffsetMs = 0;
   }
 
-  // --- Gestion du cycle (appelé à chaque rollover) ---
-
-  onCycleRollover() {
-    this._cycleIndex++;
-
-    if (this._hasPending) {
-      if (this._pendingApnea !== null) this._apneaMs = this._pendingApnea;
-      if (this._pendingExp   !== null) this._expMs   = this._pendingExp;
-      this._pendingApnea = null;
-      this._pendingExp   = null;
-      this._hasPending   = false;
-    }
-
-    this._activeApnea = this._apneaMs;
-    this._activeExp   = this._expMs;
-  }
-
-  // --- Reset complet ---
-
-  reset() {
-    this._phaseOffsetMs = 0;
-    this._cycleIndex    = 0;
-    this._pendingApnea  = null;
-    this._pendingExp    = null;
-    this._hasPending    = false;
-    this._activeApnea   = this._apneaMs;
-    this._activeExp     = this._expMs;
-  }
-
-  incrementCycleIndex() {
-    this._cycleIndex++;
-  }
-
-  // --- Mapping phase (ms) → pourcentage barre ---
+  // Fonction qui transforme une position temporelle dans le cycle (en ms) en pourcentage de remplissage de la barre
+  // N.B. phaseMs = position actuelle dans le cycle, en ms
 
   phaseToPct(phaseMs) {
+
     const P_sortie = AppConfig.MARKER_PCT / 100;
     const P_3s     = AppConfig.START3_PCT / 100;
 
@@ -168,9 +172,43 @@ class CycleEngine {
     }
     const tB = Math.min(phaseMs - apnea, exhale);
     return (P_sortie * 100) + (tB / exhale) * ((1 - P_sortie) * 100);
-  }
-}
 
+  }
+
+  // Fonctions appelées à chaque "rollover", càd, à chaque nouveau cycle
+  
+  onCycleRollover() {
+    this._cycleIndex++; //Augmente le compteur
+
+    if (this._hasPending) { //Applique les changements mis en attente
+      if (this._pendingApnea !== null) this._apneaMs = this._pendingApnea;
+      if (this._pendingExp   !== null) this._expMs   = this._pendingExp;
+      this._pendingApnea = null;
+      this._pendingExp   = null;
+      this._hasPending   = false;
+    }
+
+    this._activeApnea = this._apneaMs; //Met à jour les valeurs du nouveau cycle
+    this._activeExp   = this._expMs;
+  }
+
+  incrementCycleIndex() {
+    this._cycleIndex++;
+  }
+
+  // Mise à zéro complet (après réinitialisation du cycle)
+
+  reset() {
+    this._phaseOffsetMs = 0;
+    this._cycleIndex    = 0;
+    this._pendingApnea  = null;
+    this._pendingExp    = null;
+    this._hasPending    = false;
+    this._activeApnea   = this._apneaMs;
+    this._activeExp     = this._expMs;
+  }
+
+}
 
 // ======================================================
 // AudioService — Web Audio API, scheduler lookahead
@@ -638,28 +676,28 @@ class UIController {
 // ======================================================
 
 class App {
+
   constructor() {
+    
     this._engine    = new CycleEngine();
     this._audio     = new AudioService();
     this._bar       = new BarRenderer();
     this._countdown = new CountdownController();
     this._ui        = new UIController();
 
-    // État de la boucle d'animation
     this._running       = false;
     this._rafId         = null;
     this._cycleStartPerf = 0;
 
-    // État pause
     this._isPaused      = false;
     this._pausedPhaseMs = 0;
+
   }
 
-  // ======================================================
   // Initialisation
-  // ======================================================
 
   init() {
+
     this._ui.bindEvents({
       onStart:       () => this._start(),
       onStop:        () => this._stop(),
@@ -672,17 +710,15 @@ class App {
       onExpChange:   () => this._onExpChange(),
     });
 
-    // Initialisation de l'affichage
     this._ui.setResetState();
     this._countdown.hide();
     this._bar.updateMarkers(this._engine);
     this._bar.render(0, this._engine);
     this._ui.setPhaseText("Stopped");
+
   }
 
-  // ======================================================
   // Handlers d'inputs
-  // ======================================================
 
   _onApneaChange() {
     const ms = this._ui.readApneaMs();
@@ -700,9 +736,7 @@ class App {
     }
   }
 
-  // ======================================================
   // Actions principales
-  // ======================================================
 
   async _start() {
     // Lecture des paramètres courants
@@ -723,11 +757,9 @@ class App {
     }
 
     if (this._isPaused) {
-      // Reprise depuis la position de pause
       this._cycleStartPerf = nowP - this._pausedPhaseMs + this._engine.phaseOffsetMs;
 
       if (audioOk) {
-        // Les beeps déjà passés sont marqués comme planifiés
         const pm = this._pausedPhaseMs;
         const ap = this._engine.apneaMs;
         if (pm >= ap - 3000) this._audio._lastPlanned.beep3Cycle = this._engine.cycleIndex;
@@ -817,9 +849,7 @@ class App {
     }
   }
 
-  // ======================================================
   // Boucle d'animation
-  // ======================================================
 
   _loop() {
     if (!this._running) return;
@@ -865,7 +895,7 @@ class App {
 
 
 // ======================================================
-// Point d'entrée
+// Point d’entrée - Lancement de l'application
 // ======================================================
 
 const app = new App();
