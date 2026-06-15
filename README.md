@@ -29,7 +29,7 @@ En radiothérapie externe, la gestion du mouvement respiratoire est un enjeu maj
 Cependant, des patients traités sous MANIV rapportaient :
 - Des difficultés à appréhender la **durée des apnées**
 - Des difficultés à **anticiper les phases** du cycle ventilatoire
-- Une **hétérogénéité des consignes** délivrées selon les manipulateurs
+- Une **hétérogénéité des consignes** délivrées selon les technologues en radiothérapie (RTT)
 
 **ManiView** répond à ces besoins en fournissant une information visuelle et auditive synthétique, standardisée et synchronisée au respirateur.
 
@@ -91,7 +91,7 @@ maniview/
 | Paramètre | Description | Valeur par défaut |
 |---|---|---|
 | **T haut (s)** | Durée de la phase en pression élevée (apnée soutenue) en secondes | 30,0 s |
-| **T bas (s)** | Durée de la phase en pression basse (expiration) en secondes | 4,5 s |
+| **T bas (s)** | Durée de la phase en pression basse (expiration) en secondes, modifiable via un pavé numérique intégré | 4,5 s |
 | **Nudge (s)** | Incrément de décalage pour la post-synchronisation | 0,2 s |
 | **Son activé** | Active/désactive le guidage sonore | Activé |
 
