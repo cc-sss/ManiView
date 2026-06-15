@@ -289,7 +289,9 @@ else Si deferChange == false\n(application réinitialisée ou avant démarrage)
 end
 
 note over UI, Engine
-  Le même principe s'applique à la durée d'expiration :
+  Pour Tbas, l'utilisateur ouvre d'abord
+  un pavé numérique. Après validation,
+  la logique reste identique :
   _onExpChange(), readExpSecAsMs(),
   puis setExp(nouvelleValeur, deferChange).
 end note

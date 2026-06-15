@@ -34,10 +34,10 @@
           </select>
         </label>
 
-        <label class="field"> 
+        <div class="field"> 
           <span>T bas (s)</span>
-          <input id="expSec" type="number" min="0" step="0.1" value="4.5" />
-        </label>
+          <button id="expSec" class="tbasDisplay" type="button">4,5</button>
+        </div>
 
         <div class="buttons">
           <button id="nudgeBack" class="ghost" disabled>- Nudge</button>
@@ -115,6 +115,35 @@
       </div>
 
     </main>
+  </div>
+
+  <div id="tbasKeypadOverlay" class="tbasKeypadOverlay" hidden>
+    <div class="tbasKeypad">
+      <div id="tbasKeypadDisplay" class="tbasKeypadDisplay">4,5</div>
+
+      <div class="tbasKeypadGrid">
+        <button type="button" data-key="1">1</button>
+        <button type="button" data-key="2">2</button>
+        <button type="button" data-key="3">3</button>
+
+        <button type="button" data-key="4">4</button>
+        <button type="button" data-key="5">5</button>
+        <button type="button" data-key="6">6</button>
+
+        <button type="button" data-key="7">7</button>
+        <button type="button" data-key="8">8</button>
+        <button type="button" data-key="9">9</button>
+
+        <button type="button" data-key=",">,</button>
+        <button type="button" data-key="0">0</button>
+        <button type="button" data-key="backspace">⌫</button>
+      </div>
+
+      <div class="tbasKeypadActions">
+        <button id="tbasCancelBtn" type="button">Annuler</button>
+        <button id="tbasOkBtn" type="button">OK</button>
+      </div>
+    </div>
   </div>
 
   <script src="script.js"></script>

@@ -9,6 +9,7 @@
    - Mise en page
    - Style
    AFFICHAGE DES INFORMATIONS SUR L'ÉTAT DU SYSTÈME (subclasse .readout)
+   PAVÉ NUMÉRIQUE TBAS
    PICTOGRAMMES (subclasse .labels)
    BARRE + REPÈRES + FLÈCHE SOUS LA BARRE (classe .barWrap)
    COMPTE À REBOURS
@@ -235,6 +236,90 @@ button:disabled{
 
 .readoutTop{
   padding: 0 26px 18px;
+}
+
+/* ======================================================
+   PAVÉ NUMÉRIQUE TBAS
+   ====================================================== */
+
+.tbasDisplay{
+  font-size: 26px;
+  padding: 8px 10px;
+  width: 280px;
+  text-align: left;
+  background: #ffffff;
+  color: var(--text);
+}
+
+.tbasKeypadOverlay{
+  position: fixed;
+  inset: 0;
+  z-index: 1000000;
+  background: rgba(255,255,255,.35);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.tbasKeypadOverlay[hidden]{
+  display: none;
+}
+
+.tbasKeypad{
+  width: 320px;
+  padding: 18px;
+  border-radius: 18px;
+  background: #ffffff;
+  border: 1px solid #c9c9c9;
+  box-shadow: 0 14px 40px rgba(0,0,0,.18);
+}
+
+.tbasKeypadDisplay{
+  width: 100%;
+  min-height: 54px;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+
+  border-radius: 12px;
+  border: 1px solid #c9c9c9;
+  background: #f8f8f8;
+
+  font-size: 30px;
+  font-weight: 800;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.tbasKeypadGrid{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.tbasKeypadGrid button{
+  font-size: 26px;
+  font-weight: 800;
+  padding: 16px 0;
+}
+
+.tbasKeypadActions{
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.tbasKeypadActions button{
+  flex: 1;
+  font-size: 20px;
+  font-weight: 800;
+  padding: 14px 0;
+}
+
+#tbasOkBtn{
+  background: #2e7d32;
+  border-color: #2e7d32;
+  color: #ffffff;
 }
 
 /* ======================================================

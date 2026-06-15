@@ -122,8 +122,8 @@ class CountdownController {
 }
 
 class UIController {
-    +apneaSecInput: HTMLInputElement
-    +expSecInput: HTMLInputElement
+    +apneaSecInput: HTMLSelectElement
+    +expSecInput: HTMLButtonElement
     +nudgeSecSelect: HTMLSelectElement
     +startBtn: HTMLButtonElement
     +stopBtn: HTMLButtonElement
@@ -133,11 +133,24 @@ class UIController {
     +nudgeFwdBtn: HTMLButtonElement
     +uiToggleBtn: HTMLButtonElement
     +beepEnabled: HTMLInputElement
+
+    +tbasKeypadOverlay: HTMLElement
+    +tbasKeypadDisplay: HTMLElement
+    +tbasCancelBtn: HTMLButtonElement
+    +tbasOkBtn: HTMLButtonElement
+    -_tbasDraftValue: string
+
     -_phaseTextEl: HTMLElement
     +nudgeMs: number
     --
     +readApneaMs(): number
     +readExpSecAsMs(): number
+    +formatTbasDisplay(sec): string
+    +setExpDisplay(sec): void
+    +openTbasKeypad(): void
+    +closeTbasKeypad(): void
+    +handleTbasKey(key): void
+    +confirmTbasKeypad(): number
     +setRunningState(): void
     +setStoppedState(): void
     +setResetState(): void

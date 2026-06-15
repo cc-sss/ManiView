@@ -553,6 +553,14 @@ class UIController {
     this.beepEnabled    = document.getElementById("beepEnabled");
     this.nudgeSecSelect = document.getElementById("nudgeSec");
 
+    // Pavé numérique Tbas
+    this.tbasKeypadOverlay = document.getElementById("tbasKeypadOverlay");
+    this.tbasKeypadDisplay = document.getElementById("tbasKeypadDisplay");
+    this.tbasCancelBtn     = document.getElementById("tbasCancelBtn");
+    this.tbasOkBtn         = document.getElementById("tbasOkBtn");
+
+    this._tbasDraftValue = "";
+
     // Boutons
     this.startBtn       = document.getElementById("startBtn");
     this.stopBtn        = document.getElementById("stopBtn");
@@ -606,14 +614,83 @@ class UIController {
   }
 
   readApneaMs() {
-    const sec = Helpers.clampNumber(this.apneaSecInput.value, AppConfig.APNEA_MIN_SEC, AppConfig.APNEA_MAX_SEC);
+    const sec = Helpers.clampNumber(
+      this.apneaSecInput.value,
+      AppConfig.APNEA_MIN_SEC,
+      AppConfig.APNEA_MAX_SEC
+    );
+
     this.apneaSecInput.value = sec.toFixed(1);
     return sec * 1000;
   }
 
   readExpSecAsMs() {
-    const sec = Helpers.clampNumber(this.expSecInput.value, AppConfig.EXP_MIN_SEC, AppConfig.EXP_MAX_SEC);
-    this.expSecInput.value = sec.toFixed(1);
+    const sec = Helpers.clampNumber(
+      this.expSecInput.textContent,
+      AppConfig.EXP_MIN_SEC,
+      AppConfig.EXP_MAX_SEC
+    );
+
+    this.setExpDisplay(sec);
+    return sec * 1000;
+  }
+
+  formatTbasDisplay(sec) {
+    return sec.toFixed(1).replace(".", ",");
+  }
+
+  setExpDisplay(sec) {
+    this.expSecInput.textContent = this.formatTbasDisplay(sec);
+  }
+
+  openTbasKeypad() {
+    this._tbasDraftValue = this.expSecInput.textContent.trim();
+    this.tbasKeypadDisplay.textContent = this._tbasDraftValue;
+    this.tbasKeypadOverlay.hidden = false;
+  }
+
+  closeTbasKeypad() {
+    this.tbasKeypadOverlay.hidden = true;
+  }
+
+  handleTbasKey(key) {
+    if (key === "backspace") {
+      this._tbasDraftValue = this._tbasDraftValue.slice(0, -1);
+    } 
+    
+    else if (key === ",") {
+      if (!this._tbasDraftValue.includes(",") && this._tbasDraftValue.length > 0) {
+        this._tbasDraftValue += ",";
+      }
+    } 
+    
+    else {
+      const hasComma = this._tbasDraftValue.includes(",");
+      const decimals = hasComma ? this._tbasDraftValue.split(",")[1] : "";
+
+      // Maximum 1 chiffre après la virgule
+      if (hasComma && decimals.length >= 1) return;
+
+      // Maximum 3 chiffres avant la virgule
+      const beforeComma = this._tbasDraftValue.split(",")[0];
+      if (!hasComma && beforeComma.length >= 3) return;
+
+      this._tbasDraftValue += key;
+    }
+
+    this.tbasKeypadDisplay.textContent = this._tbasDraftValue || "0";
+  }
+
+  confirmTbasKeypad() {
+    const sec = Helpers.clampNumber(
+      this._tbasDraftValue,
+      AppConfig.EXP_MIN_SEC,
+      AppConfig.EXP_MAX_SEC
+    );
+
+    this.setExpDisplay(sec);
+    this.closeTbasKeypad();
+
     return sec * 1000;
   }
 
@@ -643,7 +720,30 @@ class UIController {
     this.uiToggleBtn.addEventListener("click",   handlers.onUIToggle);
 
     this.apneaSecInput.addEventListener("input", handlers.onApneaChange);
-    this.expSecInput.addEventListener("input",    handlers.onExpChange);
+    this.expSecInput.addEventListener("click", () => {
+    this.openTbasKeypad();
+  });
+
+  this.tbasKeypadOverlay.addEventListener("click", (event) => {
+    if (event.target === this.tbasKeypadOverlay) {
+      this.closeTbasKeypad();
+    }
+  });
+
+  this.tbasCancelBtn.addEventListener("click", () => {
+    this.closeTbasKeypad();
+  });
+
+  this.tbasOkBtn.addEventListener("click", () => {
+    this.confirmTbasKeypad();
+    handlers.onExpChange();
+  });
+
+  this.tbasKeypadOverlay.querySelectorAll("[data-key]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      this.handleTbasKey(btn.dataset.key);
+    });
+  });
 
     if (this.nudgeSecSelect) {
       this.nudgeMs = Helpers.clampNumber(
@@ -704,6 +804,7 @@ class App {
     });
 
     this._ui.setResetState();
+    this._ui.setExpDisplay(AppConfig.EXP_DEFAULT_SEC);
     this._countdown.hide();
     this._bar.updateMarkers(this._engine);
     this._bar.render(0, this._engine);
