@@ -4,7 +4,7 @@
 
 Développé dans le cadre d'un travail de fin d'études de **bachelor en imagerie médicale**.
 
-<img width="1447" height="753" alt="image" src="https://github.com/user-attachments/assets/c345d9e9-8485-4f9e-82f4-d9e963e01d3e" />
+<img width="1485" height="811" alt="Capture d’écran 2026-06-15 à 10 36 34" src="https://github.com/user-attachments/assets/344515ab-6d20-445d-a574-8d612eaf1459" />
 
 ---
 
