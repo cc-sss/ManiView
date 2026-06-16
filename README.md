@@ -110,8 +110,6 @@ maniview/
 
 Aucune installation requise. Il suffit d'ouvrir `index.html` dans un navigateur moderne (Chrome, Firefox, Edge).
 
-> Le son nécessite une première interaction utilisateur (clic sur Start) pour se conformer aux politiques des navigateurs concernant l'API Web Audio.
-
 ---
 
 ## Architecture technique
@@ -167,8 +165,6 @@ Représente le flux d'initialisation lors du clic sur "Start" : lecture des para
 Représente les scénarios principaux : Stop, Reset, Saut → Sortie, Nudge, et modification de paramètres en cours de cycle.
 
 → [`uml/sequence_diagram_operations.puml`](./uml/sequence_diagram_operations.puml)
-
-> Pour visualiser les fichiers `.puml`, vous pouvez utiliser [PlantUML Online](https://www.plantuml.com/plantuml/uml/) ou l'extension [PlantUML pour VS Code](https://marketplace.visualstudio.com/items?itemName=jebbs.plantuml).
 
 ---
 
