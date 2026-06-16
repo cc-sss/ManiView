@@ -550,6 +550,8 @@ class UIController {
     // Inputs
     this.apneaSecInput  = document.getElementById("apneaSec");
     this.expSecInput = document.getElementById("expSec");
+    this.tbasUpBtn   = document.getElementById("tbasUpBtn");
+    this.tbasDownBtn = document.getElementById("tbasDownBtn");
     this.beepEnabled    = document.getElementById("beepEnabled");
     this.nudgeSecSelect = document.getElementById("nudgeSec");
 
@@ -724,6 +726,14 @@ class UIController {
     this.openTbasKeypad();
   });
 
+    this.tbasUpBtn.addEventListener("click", () => {
+    handlers.onExpAdjust(+0.1);
+  });
+
+  this.tbasDownBtn.addEventListener("click", () => {
+    handlers.onExpAdjust(-0.1);
+  });
+
   this.tbasKeypadOverlay.addEventListener("click", (event) => {
     if (event.target === this.tbasKeypadOverlay) {
       this.closeTbasKeypad();
@@ -801,6 +811,7 @@ class App {
       onUIToggle:    () => this._ui.toggleCompactUI(),
       onApneaChange: () => this._onApneaChange(),
       onExpChange:   () => this._onExpChange(),
+      onExpAdjust:   (deltaSec) => this._adjustExpSec(deltaSec),
     });
 
     this._ui.setResetState();
@@ -830,6 +841,26 @@ class App {
     const deferChange = this._running || this._isPaused;
 
     this._engine.setExp(ms, deferChange);
+
+    if (!deferChange) {
+      this._bar.updateMarkers(this._engine);
+    }
+  }
+
+  _adjustExpSec(deltaSec) {
+    const currentMs = this._ui.readExpSecAsMs();
+    const currentSec = currentMs / 1000;
+
+    const newSec = Helpers.clampNumber(
+      currentSec + deltaSec,
+      AppConfig.EXP_MIN_SEC,
+      AppConfig.EXP_MAX_SEC
+    );
+
+    this._ui.setExpDisplay(newSec);
+
+    const deferChange = this._running || this._isPaused;
+    this._engine.setExp(newSec * 1000, deferChange);
 
     if (!deferChange) {
       this._bar.updateMarkers(this._engine);

@@ -529,3 +529,28 @@ body.compactUI .barWrap{
   margin-left: auto;
   margin-right: auto;
 }
+
+
+/* Flèches bouton Tbas */
+
+.tbasControl {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+}
+
+.tbasArrows {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.tbasArrowBtn {
+  width: 26px;
+  height: 18px;
+  padding: 0;
+  font-size: 10px;
+  line-height: 1;
+  border-radius: 6px;
+  cursor: pointer;
+}
